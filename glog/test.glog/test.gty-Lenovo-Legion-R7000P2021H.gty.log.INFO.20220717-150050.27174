@@ -1,0 +1,5 @@
+Log file created at: 2022/07/17 15:00:50
+Running on machine: gty-Lenovo-Legion-R7000P2021H
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E20220717 15:00:50.487915 27174 main.cc:7] helloworld

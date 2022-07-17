@@ -1,0 +1,7 @@
+Log file created at: 2022/07/17 15:10:37
+Running on machine: gty-Lenovo-Legion-R7000P2021H
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E20220717 15:10:37.644152 28248 main.cc:14] Got lots of cookies
+I20220717 15:10:37.644611 28248 main.cc:16] Got the 1th cookie
+I20220717 15:10:37.644626 28248 main.cc:18] Got the 1th big cookie

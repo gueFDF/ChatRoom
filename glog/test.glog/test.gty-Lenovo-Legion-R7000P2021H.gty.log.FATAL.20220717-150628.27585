@@ -1,0 +1,5 @@
+Log file created at: 2022/07/17 15:06:28
+Running on machine: gty-Lenovo-Legion-R7000P2021H
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+F20220717 15:06:28.828040 27585 main.cc:13] fatal test
