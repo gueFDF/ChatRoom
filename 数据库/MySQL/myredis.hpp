@@ -28,11 +28,12 @@ public:
     int delKey(const string &key);                                //删除键，成功返回影响的行数，失败<0
 
     int hsetValue(const string &key, const string &field, const string &value); //插入哈希表
-    int hashexists(const string &key, const string &field);//查看是否存在，存在返回1，不存在返回0
-    string gethash(const string &key, const string &field);//获取对应的hash_value
-    int hashdel(const string &key, const string &field);//从哈希表删除指定的元素
+    int hashexists(const string &key, const string &field);                     //查看是否存在，存在返回1，不存在返回0
+    string gethash(const string &key, const string &field);                     //获取对应的hash_value
+    int hashdel(const string &key, const string &field);                        //从哈希表删除指定的元素
 
 
+    
 private:
     string m_addr;        // IP地址
     int m_port;           //端口号
@@ -73,10 +74,6 @@ int Redis::connect(const string &addr = "127.0.0.1", int port = 6379, const stri
         error_msg = pm_rct->errstr;
         return M_CONNECT_FAIL;
     }
-    /* if(!m_pwd.empty())
-     {
-         return connectAuth(m_pwd);
-     }*/
     return M_REDIS_OK;
 }
 //断开链接
@@ -104,4 +101,30 @@ int Redis::delKey(const string &key)
     pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
     return pm_rr->type;
 }
+
+int Redis::hsetValue(const string &key, const string &field, const string &value) //插入哈希表
+{
+    string cmd = "hset  " + key + " " + field + " " + value;
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->type;
+}
+int Redis::hashexists(const string &key, const string &field) //查看是否存在，存在返回1，不存在返回0
+{
+    string cmd = "hexists  " + key + "  " + field;
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->integer;
+}
+string Redis::gethash(const string &key, const string &field) //获取对应的hash_value
+{
+    string cmd = "hget  " + key + "  " + field;
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->str;
+}
+int Redis::hashdel(const string &key, const string &field)    //从哈希表删除指定的元素
+{
+    string cmd = "hdel  " + key + "  " + field;
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->type;
+}
+
 #endif
