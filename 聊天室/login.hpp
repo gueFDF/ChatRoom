@@ -35,8 +35,9 @@ void messagemenu()
     cout << "----------------2.查看所有好友-------------" << endl;
 }
 
-string regclier() //注册账号(客户端)
+void regclier(int socket) //注册账号(客户端)
 {
+    sendMsg(socket, "2");
     User peope;
     string p;
     string temp;
@@ -57,12 +58,24 @@ flag:
         goto flag;
     }
     peope.setpassword(temp);
-    return peope.tojson();
+    temp=peope.tojson();
+    sendMsg(socket, temp);
+    recvMsg(socket, temp);
+    cout << "账号注册成功" << endl;
+    cout << "你的账号为:" << temp << endl;
+    return;
 }
 
-string regser(void *ffd) //注册账号(服务器)
+void regser(void *arg) //注册账号(服务器)
 {
-    int fd = *(int *)ffd;
+    struct epoll_event temp;
+    int *arr = (int *)arg;
+    int fd = arr[0];
+    int efd = arr[1];
+    temp.data.fd = fd;
+    temp.events = EPOLLIN;
+    epoll_ctl(efd, EPOLL_CTL_DEL, fd, &temp); //从树上去除该套接字
+
     string buf;
     recvMsg(fd, buf);
     User people;
@@ -72,14 +85,14 @@ string regser(void *ffd) //注册账号(服务器)
     r.connect();
     r.hsetValue("peopleinfo", UID, buf);
     r.saddvalue("info", UID);
-    return UID;
+    sendMsg(fd, UID);
+    epoll_ctl(efd, EPOLL_CTL_DEL, fd, &temp); //再添加回树上
 }
 
-void logincli(int fd, User &people) //登录(客户端)
+int logincli(int fd, User &people) //登录(客户端)
 {
     string UID;
     string password;
-flag:
     cout << "请输入你的账号: ";
     cin >> UID;
     cout << "请输入你的密码: ";
@@ -92,14 +105,14 @@ flag:
     if (buf == "-2")
     {
         cout << "账号错误,请重新输入" << endl;
-        goto flag;
+        return 0;
     }
     else
     {
         if (buf == "-1")
         {
             cout << "密码错误,请重新输入" << endl;
-            goto flag;
+            return 0;
         }
         else
         {
@@ -108,6 +121,7 @@ flag:
             people.jsonparse(buf);
         }
     }
+    return 1;
 }
 
 void loginser(void *arg) //登录(服务器)
@@ -123,7 +137,6 @@ void loginser(void *arg) //登录(服务器)
     Redis r;
     r.connect();
     string buf;
-flag:
     recvMsg(fd, buf);
     cout << buf << endl;
     loginmessage p;
@@ -133,7 +146,8 @@ flag:
     if (!r.sismember("info", UID)) //如果该账号不存在
     {
         sendMsg(fd, "-2");
-        // goto flag;
+        epoll_ctl(efd, EPOLL_CTL_ADD, fd, &temp);
+        return;
     }
     else //账号存在，下面进行密码匹配
     {
@@ -143,7 +157,8 @@ flag:
         if (people.getpassword() != password) //密码错误
         {
             sendMsg(fd, "-1");
-            // goto flag;
+            epoll_ctl(efd, EPOLL_CTL_ADD, fd, &temp);
+            return;
         }
         else
         {

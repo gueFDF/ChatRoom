@@ -51,8 +51,11 @@ int main()
                 }
                 else if (buf == "2") //有人要注册账号
                 {
-                    buf = regser(&ep[i].data.fd);
-                    sendMsg(ep[i].data.fd, buf);
+                    int arg[]={ep[i].data.fd,efd};
+                    Task task;
+                    task.function=regser;
+                    task.arg=arg;
+                    threadpool.addTask(task);
                 }
             }
         }
