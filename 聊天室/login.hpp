@@ -8,15 +8,12 @@
 #include "readwrite.hpp"
 #include "loginmessage.hpp"
 #include "Userinfo.hpp"
-enum
-{
-    QUIT,       //退出
-    LOGIN,      //登录
-    REGISTERED, //注册
-    DEL         //删除账号
-};
+#include "loginafter.hpp"
 using namespace std;
 
+
+void afterloginc(int fd, User tem);
+void afterlogins(int fd);
 void menulogin()
 {
     cout << "--------------------------------------" << endl;
@@ -24,7 +21,6 @@ void menulogin()
     cout << "-------------0.退出--------------------" << endl;
     cout << "-------------1.登录--------------------" << endl;
     cout << "-------------2.注册--------------------" << endl;
-    cout << "-------------3.注销--------------------" << endl;
 }
 
 void messagemenu()
@@ -32,12 +28,14 @@ void messagemenu()
     cout << "-----------------------------------------" << endl;
     cout << "----------------1.发消息------------------" << endl;
     cout << "----------------2.加好友------------------" << endl;
-    cout << "----------------2.查看所有好友-------------" << endl;
+    cout << "----------------3.查询好友信息------------------" << endl;
+    cout << "----------------4.查看好友列表-------------" << endl;
+    cout << "----------------5.注销账号----------------" << endl;
 }
 
 void regclier(int socket) //注册账号(客户端)
 {
-    sendMsg(socket, "2");
+    sendMsg(socket, REGSI);
     User peope;
     string p;
     string temp;
@@ -58,7 +56,7 @@ flag:
         goto flag;
     }
     peope.setpassword(temp);
-    temp=peope.tojson();
+    temp = peope.tojson();
     sendMsg(socket, temp);
     recvMsg(socket, temp);
     cout << "账号注册成功" << endl;
@@ -91,6 +89,7 @@ void regser(void *arg) //注册账号(服务器)
 
 int logincli(int fd, User &people) //登录(客户端)
 {
+    sendMsg(fd, LOGIN);
     string UID;
     string password;
     cout << "请输入你的账号: ";
@@ -168,6 +167,49 @@ void loginser(void *arg) //登录(服务器)
             sendMsg(fd, json);
         }
     }
-    epoll_ctl(efd, EPOLL_CTL_ADD, fd, &temp);
+    afterlogins(fd);
+    // epoll_ctl(efd, EPOLL_CTL_ADD, fd, &temp);
+}
+
+//登录后操作(用户)
+void afterloginc(int fd, User tem)
+{
+    string temp;
+    logafter people(fd, tem);
+    cout << "请输入你的选择:" << endl;
+    int p;
+    cin>>p;
+    do
+    {
+
+        switch (p)
+        {
+        case 1:
+            break;
+        case 2:
+            people.addfrendc();
+            break;
+        case 3:
+            break;
+        case 0:
+            cout << "退出成功" << endl;
+        default:
+            cout << "输入错误" << endl;
+        }
+    } while (0);
+}
+void afterlogins(int fd)
+{
+    string temp;
+    logafter tt(fd);
+    do
+    {
+        recvMsg(fd, temp);
+        if (temp == ADDFREND) //添加好友
+        {
+            tt.addfrends();
+        }
+
+    } while (/*temp != LOGOUT*/0);
 }
 #endif

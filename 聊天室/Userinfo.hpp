@@ -48,6 +48,10 @@ public:
     {
         name = na;
     }
+    string getname()
+    {
+        return name;
+    }
     void settele(string temp)
     {
         tele=temp;
@@ -63,6 +67,10 @@ public:
     int getlog()
     {
         return islog;
+    }
+    string getfrend()
+    {
+        return my_friend;
     }
     string tojson();
     void jsonparse(string &json);

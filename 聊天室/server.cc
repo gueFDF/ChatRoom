@@ -41,7 +41,7 @@ int main()
             {
 
                 recvMsg(ep[i].data.fd, buf);
-                if (buf == "1") //有人登录
+                if (buf == LOGIN) //有人登录
                 {
                     int arg[]={ep[i].data.fd,efd};
                     Task task;
@@ -49,7 +49,7 @@ int main()
                     task.arg=arg;
                     threadpool.addTask(task);
                 }
-                else if (buf == "2") //有人要注册账号
+                else if (buf == REGSI) //有人要注册账号
                 {
                     int arg[]={ep[i].data.fd,efd};
                     Task task;

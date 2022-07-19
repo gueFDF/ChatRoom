@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Tue Jul 19 14:22:24 2022
+# Make data base, printed on Tue Jul 19 21:53:07 2022
 
 # Variables
 
@@ -47,7 +47,7 @@ SHELL = /bin/sh
 # environment
 VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"42e84e0914b17800d483f69e299e1b00.zh-cn","_translationsConfigFile":"/home/gty/.config/Code/clp/42e84e0914b17800d483f69e299e1b00.zh-cn/tcf.json","_cacheRoot":"/home/gty/.config/Code/clp/42e84e0914b17800d483f69e299e1b00.zh-cn","_resolvedLanguagePackCoreLocation":"/home/gty/.config/Code/clp/42e84e0914b17800d483f69e299e1b00.zh-cn/da15b6fd3ef856477bf6f4fb29ba1b7af717770d","_corruptedFile":"/home/gty/.config/Code/clp/42e84e0914b17800d483f69e299e1b00.zh-cn/corrupted.info","_languagePackSupport":true}
 # environment
-_ = /usr/share/code/code
+_ = /usr/bin/dbus-update-activation-environment
 # environment
 JOURNAL_STREAM = 8:52491
 # environment
@@ -81,7 +81,7 @@ VSCODE_CWD = /home/gty
 # default
 MAKE_HOST := x86_64-pc-linux-gnu
 # environment
-PATH = /home/gty/bin:/home/gty/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PATH = /home/gty/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
 GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
@@ -105,7 +105,7 @@ XDG_SESSION_DESKTOP = ubuntu
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 13851
+GIO_LAUNCHED_DESKTOP_FILE_PID = 121331
 # automatic
 %F = $(notdir $%)
 # environment
@@ -135,7 +135,7 @@ VSCODE_CODE_CACHE_PATH = /home/gty/.config/Code/CachedData/da15b6fd3ef856477bf6f
 # environment
 LOGNAME = gty
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # automatic
 +F = $(notdir $+)
 # environment
@@ -157,7 +157,7 @@ SHLVL = 0
 # environment
 GNOME_SHELL_SESSION_MODE = ubuntu
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-711f4808-063c-4552-9c6b-ff204e55dbdf.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-07083c9e-be4a-4013-a41b-e4281d388551.sock
 # default
 MAKE_VERSION := 4.2.1
 # environment
@@ -194,6 +194,8 @@ MFLAGS = -pqrR
 GDK_BACKEND = x11
 # environment
 LC_PAPER = zh_CN.UTF-8
+# environment
+NO_AT_BRIDGE = 1
 # environment
 QT_ACCESSIBILITY = 1
 # default
@@ -233,7 +235,7 @@ VSCODE_PID = 13851
 # environment
 DBUS_STARTER_ADDRESS = unix:path=/run/user/1000/bus,guid=6091524dc33f60018b23791562d4c199
 # variable set hash-table stats:
-# Load=110/1024=11%, Rehash=0, Collisions=17/135=13%
+# Load=111/1024=11%, Rehash=0, Collisions=17/136=12%
 
 # Pattern-specific Variable Values
 
@@ -241,9 +243,9 @@ DBUS_STARTER_ADDRESS = unix:path=/run/user/1000/bus,guid=6091524dc33f60018b23791
 
 # Directories
 
-# . (device 66313, inode 2622544): 16 files, no impossibilities.
+# . (device 66313, inode 2622544): 19 files, no impossibilities.
 
-# 16 files, no impossibilities in 1 directories.
+# 19 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -281,6 +283,7 @@ client.cc:
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
+ 
 #  Last modified 2022-07-19 14:19:29.086718582
 #  File has been updated.
 #  Successfully updated.
@@ -296,7 +299,6 @@ clean:
 #  Modification time never checked.
 #  File has not been updated.
 #  recipe to execute (from 'makefile', line 6):
- 
 			rm -f client
 			rm -f client
 
@@ -308,12 +310,12 @@ clean:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 23 / storage = 226 B / avg = 9 B
-# current buf: size = 8162 B / used = 226 B / count = 23 / avg = 9 B
+# strcache buffers: 1 (0) / strings = 26 / storage = 258 B / avg = 9 B
+# current buf: size = 8162 B / used = 258 B / count = 26 / avg = 9 B
 
-# strcache performance: lookups = 33 / hit rate = 30%
+# strcache performance: lookups = 36 / hit rate = 27%
 # hash-table stats:
-# Load=23/8192=0%, Rehash=0, Collisions=1/33=3%
-# Finished Make data base on Tue Jul 19 14:22:24 2022
+# Load=26/8192=0%, Rehash=0, Collisions=1/36=3%
+# Finished Make data base on Tue Jul 19 21:53:07 2022
 
  

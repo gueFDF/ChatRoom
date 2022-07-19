@@ -15,12 +15,12 @@ int main()
         switch (p)
         {
         case 1:
-            temp = "1";
-            sendMsg(socket, temp);
+
             ret=logincli(socket, people);
             if(!ret)
             break;
-            messagemenu();
+            messagemenu();//打印登录后的界面
+            afterloginc(socket,people);
             break;
         case 2:
             regclier(socket);
