@@ -3,13 +3,14 @@
 int main()
 {
     int socket = Sock::Socket();
-    Sock::Connect(socket, "127.0.0.1", 9997);
+    Sock::Connect(socket, "127.0.0.1", 9999);
     int p;
     int ret;
     User people; //存放该用户的所有信息
     string temp;
     do
     {
+         system("clear");
         menulogin();
         cin >> p;
         switch (p)
@@ -19,7 +20,6 @@ int main()
             ret=logincli(socket, people);
             if(!ret)
             break;
-            messagemenu();//打印登录后的界面
             afterloginc(socket,people);
             break;
         case 2:

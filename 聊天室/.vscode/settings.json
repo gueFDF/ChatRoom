@@ -1,6 +1,7 @@
 {
-    "makefile.extensionOutputFolder": "./.vscode",
     "files.associations": {
-        "cmath": "cpp"
+        "optional": "cpp",
+        "type_traits": "cpp",
+        "iostream": "cpp"
     }
 }

@@ -1,18 +1,22 @@
 #include <iostream>
 #include <cstring>
+#include<unistd.h>
+#include<fcntl.h>
 #include <sys/epoll.h>
+#include <map>
 #include "Sock.hpp"
 #include "myredis.hpp"
 #include "login.hpp"
 #include "threadpool.hpp"
-#define PORT 9997
+#define PORT 9999
 #define LISTEN 1024
 #define EPOLL 1024
 int main()
 {
 
+    map<string, int> mmap;
     //创建一个线程池
-    ThreadPool threadpool(10);//创建一个有十个线程的线程池
+    ThreadPool threadpool(10); //创建一个有十个线程的线程池
     int i = 0, cfd;
     int ret = 1; //接收返回值
     string buf;
@@ -23,6 +27,7 @@ int main()
     struct epoll_event temp, ep[EPOLL];
     temp.data.fd = sockfd;
     temp.events = EPOLLIN;
+
     epoll_ctl(efd, EPOLL_CTL_ADD, sockfd, &temp);
     while (1)
     {
@@ -35,6 +40,12 @@ int main()
                 sleep(3);
                 temp.data.fd = cfd;
                 temp.events = EPOLLIN;
+                //设置非阻塞
+                /*
+                int flag;
+                flag = fcntl(cfd, F_GETFL);
+                flag |= O_NONBLOCK;
+                fcntl(cfd, F_SETFL, flag); //设置非阻塞*/
                 epoll_ctl(efd, EPOLL_CTL_ADD, cfd, &temp);
             }
             else
@@ -43,18 +54,18 @@ int main()
                 recvMsg(ep[i].data.fd, buf);
                 if (buf == LOGIN) //有人登录
                 {
-                    int arg[]={ep[i].data.fd,efd};
+                    int arg[] = {ep[i].data.fd, efd};
                     Task task;
-                    task.function= loginser;
-                    task.arg=arg;
+                    task.function = loginser;
+                    task.arg = arg;
                     threadpool.addTask(task);
                 }
                 else if (buf == REGSI) //有人要注册账号
                 {
-                    int arg[]={ep[i].data.fd,efd};
+                    int arg[] = {ep[i].data.fd, efd};
                     Task task;
-                    task.function=regser;
-                    task.arg=arg;
+                    task.function = regser;
+                    task.arg = arg;
                     threadpool.addTask(task);
                 }
             }

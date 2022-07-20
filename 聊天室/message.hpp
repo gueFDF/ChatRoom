@@ -6,19 +6,42 @@
 #include <cstdlib>
 #include <json/json.h>
 #include <ctime>
-#include<cstdio>
+#include <cstdio>
 using namespace std;
 using namespace Json;
 struct message
 {
 private:
-    string name;        //昵称
-    string picture;     //暂时用string来代替图片
-    string information; //消息
-    string my_time;        //时间
+    string name;        //发送者昵称
+    string UIDfrom;     //原地址
+    string UIDto;       //目标地址
+    string information; //消息内容
+    string my_time;     //时间
 public:
-    message(string name1 = "封宇腾", string picture1 = "小企鹅.png") : name(name1), picture(picture1){};
-    static string gettime()
+    message(string name1 , string UIDfrom1,string UIDto1) : name(name1), UIDfrom(UIDfrom1),UIDto(UIDto1){};
+    message(){};
+
+    string getname()
+    {
+        return name;
+    }
+    string getinfo()
+    {
+        return information;
+    }
+    string gettime()
+    {
+        return my_time;
+    }
+    string getUIDfrom()
+    {
+        return UIDfrom;
+    }
+    string getUIDto()
+    {
+        return UIDto;
+    }
+    string getmtime()
     {
         time_t rawtime;
         struct tm *ptm;
@@ -29,41 +52,34 @@ public:
         move(string(data));
         return data;
     }
-    void setinformation()
+    void setinformation(string p)
     {
-        cin>>information;
+        information=p;
     }
-    string enter()
+    string tojson()
     {
-        my_time=gettime();
+        my_time = getmtime();
         Value root;
         root.append(name);
-        root.append(picture);
+        root.append(UIDfrom);
+        root.append(UIDto);
         root.append(information);
         root.append(my_time);
         FastWriter f;
-        string json =f.write(root);
+        string json = f.write(root);
         return json;
     }
-    void receive(string json)
+    void josnparse(string json)
     {
         Value root;
         Reader r;
-        r.parse(json,root);
-        int i=0;
-        name=root[i++].asString();
-        picture=root[i++].asString();
-        information=root[i++].asString();
-        my_time=root[i++].asString();
-    
-       
-    }
-    void print()
-    {
-        cout<<"昵称："<<name<<endl;
-        cout<<"头像："<<picture<<endl;
-        cout<<"时间："<<my_time<<endl;
-        cout<<"消息："<<information<<endl; 
+        r.parse(json, root);
+        int i = 0;
+        name = root[i++].asString();
+        UIDfrom = root[i++].asString();
+        UIDto = root[i++].asString();
+        information = root[i++].asString();
+        my_time = root[i++].asString();
     }
 };
 #endif

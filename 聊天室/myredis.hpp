@@ -31,10 +31,18 @@ public:
     int hashexists(const string &key, const string &field);                     //查看是否存在，存在返回1，不存在返回0
     string gethash(const string &key, const string &field);                     //获取对应的hash_value
     int hashdel(const string &key, const string &field);                        //从哈希表删除指定的元素
+    int hlen(const string &key);                                                //返回哈希表中的元素个数
+    int scard(const string &key);                                               //返回set集合里的元素个数
+    int saddvalue(const string &key, const string &value);                      //插入到集合
+    int sismember(const string &key, const string &value);                      //查看数据是否存在
+    int sremvalue(const string &key, const string &value);                      //将数据从set中移出
+    redisReply **smembers(const string &key);
+    //对list进行操作
+    int lpush(const string &key, const string &value);
+    int llen(const string &key);
+    redisReply **lrange(const string &key);                     //返回所有消息
+    redisReply **lrange(const string &key, string a, string b); //返回指定的消息记录
 
-    int saddvalue(const string &key, const string &value); //插入到集合
-    int sismember(const string &key, const string &value); //查看数据是否存在
-    int sremvalue(const string &key, const string &value); //将数据从set中移出
 private:
     string m_addr;        // IP地址
     int m_port;           //端口号
@@ -146,4 +154,50 @@ int Redis::sremvalue(const string &key, const string &value) //将数据从set�
     pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
     return pm_rr->type;
 }
+int Redis::hlen(const string &key) //返回哈希表中的元素个数
+{
+    string cmd = "hlen  " + key;
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->integer;
+}
+int Redis::scard(const string &key) //返回set集合里的元素个数
+{
+    string cmd = "scard  " + key;
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->integer;
+}
+redisReply **Redis::smembers(const string &key)
+{
+    string cmd = "smembers  " + key;
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->element;
+}
+
+int Redis::lpush(const string &key, const string &value)
+{
+    string cmd = "lpush  " + key + " " + value;
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->type;
+}
+int Redis::llen(const string &key)
+{
+    string cmd = "llen  " + key;
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->integer;
+}
+
+redisReply **Redis::lrange(const string &key) //返回所有消息
+{
+    string cmd = "lrange  " + key + "  0" + "  -1";
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->element;
+}
+
+redisReply **Redis::lrange(const string &key, string a, string b) //返回指定的消息记录
+{
+    string cmd = "lrange  " + key + "  "+a + "  "+b;
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->element;
+}
+
 #endif
