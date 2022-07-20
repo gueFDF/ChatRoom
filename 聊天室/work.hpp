@@ -18,6 +18,7 @@ void* worker1(void*arg)
         }
         mss.josnparse(json);
         cout<<mss.getname()<<" : "<<mss.getinfo()<<endl;
+        
     }
    
 

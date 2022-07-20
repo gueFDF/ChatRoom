@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/gty/vscode/ChatRoom/聊天室'
+g++ client.cc -o client -lhiredis -ljson -lpthread
+g++ server.cc -o server -lhiredis -ljson -lpthread
+make: Leaving directory '/home/gty/vscode/ChatRoom/聊天室'
+ 

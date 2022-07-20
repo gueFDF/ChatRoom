@@ -8,7 +8,7 @@
 #include "myredis.hpp"
 #include "login.hpp"
 #include "threadpool.hpp"
-#define PORT 9999
+#define PORT 9997
 #define LISTEN 1024
 #define EPOLL 1024
 int main()

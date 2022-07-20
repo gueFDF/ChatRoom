@@ -3,7 +3,7 @@
 int main()
 {
     int socket = Sock::Socket();
-    Sock::Connect(socket, "127.0.0.1", 9999);
+    Sock::Connect(socket, "127.0.0.1", 9997);
     int p;
     int ret;
     User people; //存放该用户的所有信息

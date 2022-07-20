@@ -62,9 +62,9 @@ flag:
     temp = peope.tojson();
     sendMsg(socket, temp);
     recvMsg(socket, temp);
-    sleep(1);
-    system("clear");
-    sleep(1);
+    //sleep(1);
+    //system("clear");
+    //sleep(1);
     cout << "账号注册成功" << endl;
     cout << "你的账号为:" << temp << endl;
     return;
@@ -120,8 +120,8 @@ int logincli(int fd, User &people) //登录(客户端)
         }
         else
         {
-            sleep(1);
-            system("clear");
+            //sleep(1);
+            //system("clear");
             cout << "登录成功" << endl;
             recvMsg(fd, buf);
             people.jsonparse(buf);
@@ -193,6 +193,8 @@ void afterloginc(int fd, User &tem)
     {
         recvMsg(fd, temp);
         ttemp.jsonparse(temp);
+        cout<<ttemp.getname()<<" : "<<ttemp.getUID()<<endl;
+       // cout<<ttemp.getfrend()<<" : "<<ttemp.getUID()<<endl;
         myfrends.push_back(pair<string, User>(tem.getUID(), ttemp));
     }
     logafter people(fd, tem);
@@ -200,8 +202,8 @@ void afterloginc(int fd, User &tem)
 
     do
     {
-        sleep(1);
-        system("clear");
+        //sleep(1);
+        //system("clear");
         messagemenu(); //打印登录后的界面
         cout << "请输入你的选择:" << endl;
         cin >> p;

@@ -7,7 +7,7 @@
 #define SEARFREND "5" //查询好友信息
 #define SHOWFREND "6" //展示好友列表
 #define LOGOUT "7"    //退出账号
-#define ABOURT "8"   //退出私聊
+#define ABOURT "8"    //退出私聊
 #include "login.hpp"
 #include "work.hpp"
 class logafter
@@ -51,8 +51,8 @@ void logafter::addfrendc()
     }
     else
     {
-        sleep(1);
-        system("clear");
+        // sleep(1);
+        // system("clear");
         User ret;
         recvMsg(socket, temp);
         ret.jsonparse(temp);
@@ -89,35 +89,34 @@ void logafter::addfrends()
 void logafter::sendmsgc(vector<pair<string, User>> &myfrends) //发送消息(客户端) 私人聊天
 {
     int size = myfrends.size();
-    sleep(1);
-    system("clear");
+    // sleep(1);
+    // system("clear");
     cout << "-------------------------------" << endl;
     for (int i = 1; i <= size; i++)
     {
-        cout << i << "  .  " << myfrends[i - 1].second.getname() << endl;
+        cout << i << "  .  " << myfrends[i - 1].second.getname() << " " << myfrends[i - 1].second.getUID() << endl;
     }
     cout << "-------------------------------" << endl;
     sendMsg(socket, TOMSG);
     cout << "请选择你要进行聊天的好友" << endl;
     int i;
     cin >> i;
-    usleep(500000);
-    system("clear");
-    cout << "              " << myfrends[i - 1].second.getname() << endl;
+    // usleep(800000);
+    // system("clear");
+    cout << "             和" << myfrends[i - 1].second.getname() << "的聊天" << endl;
     cout << endl;
     string m;
     string json;
-    message mes(people.getname(), people.getUID(), myfrends[i-1].first);
+    message mes(people.getname(), people.getUID(), myfrends[i - 1].second.getUID());
     pthread_t tid;
-
     pthread_create(&tid, NULL, worker1, (void *)&socket);
     while (1)
     {
-        cout<<people.getname()<<" : ";
+        cout << people.getname() << " : ";
         cin >> m;
         if (m == "quit") //退出聊天
         {
-            sendMsg(socket,ABOURT);
+            sendMsg(socket, ABOURT);
             break;
         }
         mes.setinformation(m);
@@ -129,29 +128,31 @@ void logafter::sendmsgs() //发送消息(服务器) 私人聊天
 {
     message mms;
     string json;
-    recvMsg(socket, json);
-    if(json==ABOURT)  //对方退出私聊
+    while (1)
     {
-        sendMsg(socket,ABOURT);
-        return;
-    }
-    mms.josnparse(json);
-    string UID=mms.getUIDto();
-    Redis r;//打开数据库
-    r.connect();
-    if(!r.hashexists("islog",UID))  //如果对方不在线
-    {
-        printf("不在线\n");
-    }
-    else //如果对方在线，直接进行消息发送
-    {
+        recvMsg(socket, json);
+        if (json == ABOURT) //对方退出私聊
+        {
+            sendMsg(socket, ABOURT);
+            return;
+        }
+        mms.josnparse(json);
+        string UID = mms.getUIDto();
+        Redis r; //打开数据库
+        r.connect();
+        if (!r.hashexists("islog", UID)) //如果对方不在线
+        {
+            printf("不在线\n");
+        }
+        else //如果对方在线，直接进行消息发送
+        {
             //先获取套接字
-            string ffd=r.gethash("islog",UID);
-            int fd=stoi(ffd);
-            sendMsg(fd,json);
-            string pp=mms.getUIDfrom()+mms.getUIDto();  //历史消息记录存放索引
-            r.lpush(pp,json);
-
-    } 
+            string ffd = r.gethash("islog", UID);
+            int fd = stoi(ffd);
+            sendMsg(fd, json);
+            string pp = mms.getUIDfrom() + mms.getUIDto(); //历史消息记录存放索引
+            r.lpush(pp, json);
+        }
+    }
 }
 #endif
