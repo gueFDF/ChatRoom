@@ -21,6 +21,8 @@ int main()
     int ret = 1; //接收返回值
     string buf;
     int sockfd = Sock::Socket();
+     int opt=1;
+    setsockopt(sockfd,SOL_SOCKET ,SO_REUSEADDR,(void *)&opt,sizeof(int));//端口复用
     Sock::Bind(sockfd, PORT);
     Sock::Listen(sockfd, LISTEN);
     int efd = epoll_create(EPOLL);
