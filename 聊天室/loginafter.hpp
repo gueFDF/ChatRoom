@@ -1,13 +1,15 @@
 #ifndef __LOGINAFTER__
 #define __LOGINAFTER__
-#define LOGIN "1"     //登录
-#define REGSI "2"     //注册
-#define TOMSG "3"     //发消息
-#define ADDFREND "4"  //加好友
-#define SEARFREND "5" //查询好友信息
-#define SHOWFREND "6" //展示好友列表
-#define LOGOUT "7"    //退出账号
-#define ABOURT "8"    //退出私聊
+#define LOGIN "1"       //登录
+#define REGSI "2"       //注册
+#define TOMSG "3"       //发消息
+#define ADDFREND "4"    //加好友
+#define SEARFREND "5"   //查询好友信息
+#define SHOWFREND "6"   //展示好友列表
+#define LOGOUT "7"      //退出账号
+#define ABOURT "8"      //退出私聊
+#define READMESSAGE "9" //客户端去消息缓冲区读消息
+
 #include "login.hpp"
 #include "work.hpp"
 class logafter
@@ -15,6 +17,16 @@ class logafter
 private:
     User people;
     int socket;
+
+public:
+    int getsocket()
+    {
+        return socket;
+    }
+    User getuser()
+    {
+        return people;
+    }
 
 public:
     logafter(int fd) : socket(fd){};
@@ -101,15 +113,33 @@ void logafter::sendmsgc(vector<pair<string, User>> &myfrends) //发送消息(客
     cout << "请选择你要进行聊天的好友" << endl;
     int i;
     cin >> i;
-    // usleep(800000);
-    // system("clear");
-    cout << "             和" << myfrends[i - 1].second.getname() << "的聊天" << endl;
+    usleep(800000);
+    system("clear");
+    cout << "                和" << myfrends[i - 1].second.getname() << "的聊天" << endl;
     cout << endl;
     string m;
     string json;
+    //打印部分历史聊天记录
+    message temp;
+    //先发送历史聊天记录索引
+    json = people.getUID() + myfrends[i - 1].second.getUID();
+    sendMsg(socket, json);
+    //接收历史聊天记录要打印的个数
+    recvMsg(socket,json);
+    int len=stoi(json);
+    //打印历史消息记录
+    for(int j=0;j<len;j++)
+    {
+        recvMsg(socket,json);
+        temp.josnparse(json);
+        cout<<"         "<<temp.gettime()<<endl;
+        cout<<temp.getname()<<" : "<<temp.getinfo()<<endl;
+    }
+    cout<<"        "<<"\033[1m\033[33m以上为历史消息记录\033[0m"<<endl;
     message mes(people.getname(), people.getUID(), myfrends[i - 1].second.getUID());
+    pair<string, int> w(myfrends[i - 1].second.getUID(), socket);
     pthread_t tid;
-    pthread_create(&tid, NULL, worker1, (void *)&socket);
+    pthread_create(&tid, NULL, worker1, (void *)&w);
     while (1)
     {
         cout << people.getname() << " : ";
@@ -128,21 +158,48 @@ void logafter::sendmsgs() //发送消息(服务器) 私人聊天
 {
     message mms;
     string json;
+    redisReply**arr;
+    Redis r; //打开数据库
+    r.connect();
+    int ret = 0;
+    //打印四条历史聊天记录
+    //先接收索引
+    recvMsg(socket, json);
+    int len = r.llen(json);
+    //发送消息个数
+    if(len<=4)
+    {
+        sendMsg(socket,to_string(len));
+    }
+    else
+    {
+        int len=4;
+        sendMsg(socket,to_string(len));
+    }
+    //发送历史消息记录
+    if(len!=0)
+    arr=r.lrange(json,"0",to_string(len-1));//从数据库中获取
+    for(int i=len-1;i>=0;i--)
+    {
+        sendMsg(socket,arr[i]->str);
+    }
     while (1)
     {
-        recvMsg(socket, json);
-        if (json == ABOURT) //对方退出私聊
+        ret = recvMsg(socket, json);
+        if (json == ABOURT || ret == 0) //对方退出私聊
         {
             sendMsg(socket, ABOURT);
             return;
         }
         mms.josnparse(json);
         string UID = mms.getUIDto();
-        Redis r; //打开数据库
-        r.connect();
         if (!r.hashexists("islog", UID)) //如果对方不在线
         {
-            printf("不在线\n");
+            // printf("不在线\n");
+            string pp = mms.getUIDfrom() + mms.getUIDto(); //历史消息记录存放索引
+            string pp2 =mms.getUIDto()+mms.getUIDfrom();
+            r.lpush(pp, json);
+            r.lpush(pp2, json);
         }
         else //如果对方在线，直接进行消息发送
         {

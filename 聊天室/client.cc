@@ -8,19 +8,18 @@ int main()
     int ret;
     User people; //存放该用户的所有信息
     string temp;
+    system("clear");
     do
     {
-         system("clear");
         menulogin();
         cin >> p;
         switch (p)
         {
         case 1:
-
-            ret=logincli(socket, people);
-            if(!ret)
-            break;
-            afterloginc(socket,people);
+            ret = logincli(socket, people);
+            if (!ret)
+                break;
+            afterloginc(socket, people);
             break;
         case 2:
             regclier(socket);
@@ -30,9 +29,9 @@ int main()
             sendMsg(socket, temp);
             break;
         case 0:
-            cout<<"退出成功"<<endl;
+            cout << "退出成功" << endl;
         default:
-            cout<<"选择错误，请重新选择"<<endl;
+            cout << "选择错误，请重新选择" << endl;
             break;
         }
     } while (p);

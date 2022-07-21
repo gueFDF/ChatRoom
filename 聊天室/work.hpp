@@ -5,9 +5,11 @@
 #include "message.hpp"
 void* worker1(void*arg)
 {
+    pair<string,int>p=*(pair<string ,int>*)arg;
     message mss;
     string json;
-    int fd=*((int*)arg);
+    int fd=p.second;
+    string UIDfrend=p.first;
     while(1)
     {
         recvMsg(fd,json);
@@ -17,7 +19,10 @@ void* worker1(void*arg)
             return NULL;
         }
         mss.josnparse(json);
+        if(mss.getUIDfrom()==UIDfrend)
         cout<<mss.getname()<<" : "<<mss.getinfo()<<endl;
+        else
+        cout<<"\033[1m\033[31m"<<"           "<<"收到一条来自"<<mss.getname()<<"的一条消息"<<"\033[0m"<<endl;
         
     }
    
