@@ -33,20 +33,41 @@ void *worker2(void *arg)
 {
     User people = *(User *)arg;
     int socket = Sock::Socket();
-    Sock::Connect(socket, "127.0.0.1", 9998);
+    Sock::Connect(socket, "127.0.0.1", 9999);
     while (1)
     {
         sendMsg(socket, THREAD);
-        sendMsg(socket, people.getUID());
+        int ret = sendMsg(socket, people.getUID());
         string buf;
-        recvMsg(socket, buf);
+        recvMsg(socket, buf); //
         if (buf == ISHAVEFRENDADD)
         {
             cout << "收到一条好友添加申请" << endl;
-            //从容器中去掉
         }
+        else
+        {
+           // cout << "nofrend" << endl;
+        }
+
         recvMsg(socket, buf);
-        sleep(1);//每隔一秒检查一次
+        if (buf != "NO")
+        {
+            cout << "收到一条来自" << buf << "的消息" << endl;
+        }
+        else
+        {
+          //  cout << "nochat" << endl;
+        }
+        //读被删消息
+        recvMsg(socket,buf);
+        int len=stoi(buf);
+        for(int i=0;i<len;i++)
+        {
+            recvMsg(socket,buf);
+            cout<<"你已被"<<buf<<"删除,你们将不再是好友"<<endl;
+        }
+        
+        sleep(1); //每隔一秒检查一次
     }
 }
 #endif

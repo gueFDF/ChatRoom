@@ -30,12 +30,15 @@ void messagemenu()
     cout << "                  聊天室                    " << endl;
     cout << "-----------------------------------------" << endl;
     cout << "                1.私聊                   " << endl;
-    cout << "                2.群聊                   " << endl;
+    // cout << "                2.群聊                   " << endl;
+    cout << "                2.查看好友申请             " << endl;
     cout << "                3.加好友                 " << endl;
     cout << "                4.查看历史聊天记录         " << endl;
     cout << "                5.查询好友信息            " << endl;
     cout << "                6.查看好友列              " << endl;
-    cout << "                7.注销账号                " << endl;
+    cout << "                7.删除好友                " << endl;
+    cout << "                8.刷新                   " << endl;
+    cout << "                9.注销账号                " << endl;
     cout << "------------------------------------------" << endl;
 }
 
@@ -195,8 +198,8 @@ void loginser(void *arg) //登录(服务器)
 //登录后操作(用户)
 void afterloginc(int fd, User &tem)
 {
-     pthread_t tid;
-     pthread_create(&tid,NULL,worker2,(void*)&tem);
+    pthread_t tid;
+    pthread_create(&tid, NULL, worker2, (void *)&tem);
     //先把好友加载到本地
     //现接收好友个数
     string temp;
@@ -209,8 +212,6 @@ void afterloginc(int fd, User &tem)
     {
         recvMsg(fd, temp);
         ttemp.jsonparse(temp);
-        cout << ttemp.getname() << " : " << ttemp.getUID() << endl;
-        // cout<<ttemp.getfrend()<<" : "<<ttemp.getUID()<<endl;
         myfrends.push_back(pair<string, User>(tem.getUID(), ttemp));
     }
     logafter people(fd, tem);
@@ -229,6 +230,7 @@ void afterloginc(int fd, User &tem)
             people.sendmsgc(myfrends);
             break;
         case 2:
+            people.findfrendc(myfrends);
             break;
         case 3:
             people.addfrendc();
@@ -244,6 +246,12 @@ void afterloginc(int fd, User &tem)
             cout << "输入任意字符退出" << endl;
             cin >> temp;
             system("clear");
+            break;
+        case 7:
+            people.delfrendc(myfrends);
+            break;
+        case 8:
+            people.flushc(myfrends);
             break;
         case 0:
             sendMsg(fd, LOGOUT);
@@ -293,7 +301,73 @@ void afterlogins(int fd, User &tem)
         {
             tt.findhistorys();
         }
+        if (temp == FINDFREND) //查看好友申请
+        {
+            tt.findfrends();
+        }
+        if (temp == FLUSH) //刷新
+        {
+            tt.flushs();
+        }
+        if (temp == DELFREND) //删除好友
+        {
+            tt.delfrends();
+        }
     } while (temp != LOGOUT && ret != 0);
     r.hashdel("islog", tem.getUID());
+}
+
+void history(void *arg)
+{
+    struct epoll_event temp;
+    int *arr = (int *)arg;
+    int fd = arr[0];
+    int efd = arr[1];
+    temp.data.fd = fd;
+    temp.events = EPOLLIN;
+    epoll_ctl(efd, EPOLL_CTL_DEL, fd, &temp);
+
+    Redis r;
+    r.connect();
+    string UID;
+    User people;
+    recvMsg(fd, UID);
+    string json = r.gethash("peopleinfo", UID);
+    people.jsonparse(json);
+    if (r.sismember("addfrend", UID)) //判断是否有好友添加
+    {
+        sendMsg(fd, ISHAVEFRENDADD);
+        r.sremvalue("addfrend", UID);
+    }
+    else
+    {
+        sendMsg(fd, "NO");
+    }
+
+    if (r.hashexists("chat", UID)) //判断是否有消息
+    {
+        sendMsg(fd, r.gethash("chat", UID));
+        r.hashdel("chat", UID);
+    }
+    else
+    {
+        sendMsg(fd, "NO");
+    }
+
+    // if(r.sismember(UID+"del",))
+    int len = r.scard(UID + "del");
+    sendMsg(fd, to_string(len));
+    if (len != 0)
+    {
+        redisReply **arr = r.smembers(UID + "del");
+        for (int i = 0; i < len; i++)
+        {
+
+            sendMsg(fd, people.getname());
+            r.sremvalue(UID+"del",people.getUID());
+        }
+        
+    }
+    epoll_ctl(efd, EPOLL_CTL_ADD, fd, &temp);
 }
 #endif

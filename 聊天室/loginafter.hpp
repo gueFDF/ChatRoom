@@ -1,17 +1,21 @@
 #ifndef __LOGINAFTER__
 #define __LOGINAFTER__
-#define LOGIN "1"       //登录
-#define REGSI "2"       //注册
-#define TOMSG "3"       //发消息
-#define ADDFREND "4"    //加好友
-#define SEARFREND "5"   //查询好友信息
-#define SHOWFREND "6"   //展示好友列表
-#define LOGOUT "7"      //退出账号
-#define ABOURT "8"      //退出私聊
-#define READMESSAGE "9" //客户端去消息缓冲区读消息
-#define HISTORY "10"    //查看历史消息
-#define THREAD "11"  //客户端子线程
-#define ISHAVEFRENDADD "12"  //客户端不断检查是否有好友添加
+#define LOGIN "1"           //登录
+#define REGSI "2"           //注册
+#define TOMSG "3"           //发消息
+#define ADDFREND "4"        //加好友
+#define SEARFREND "5"       //查询好友信息
+#define SHOWFREND "6"       //展示好友列表
+#define LOGOUT "7"          //退出账号
+#define ABOURT "8"          //退出私聊
+#define READMESSAGE "9"     //客户端去消息缓冲区读消息
+#define HISTORY "10"        //查看历史消息
+#define THREAD "11"         //客户端子线程
+#define ISHAVEFRENDADD "12" //客户端不断检查是否有好友添加
+#define ISHAVEMESSAGE "13"  //客户端不断检查是否有新消息
+#define FINDFREND "14"      //查看好友申请
+#define FLUSH     "15"    //刷新本地好友,列表
+#define DELFREND "16"   //删除好友
 #include "login.hpp"
 #include "work.hpp"
 class logafter
@@ -45,6 +49,12 @@ public:
     void findhistorys();                                     //查看历史消息记录(服务器)
     void exitaccountc();                                     //退出账号(客户端)
     void exitaccounts();                                     //退出账号(服务器)
+    void findfrendc(vector<pair<string, User>> &myfrends);   //查看好友申请(客户端)
+    void findfrends();                                       //查看好友申请(服务器)
+    void flushc(vector<pair<string, User>> &myfrends);       //刷新一下(客户端)
+    void flushs();       //刷新一下(服务器)
+    void delfrendc(vector<pair<string, User>> &myfrends);                                        //删除好友(客户端)
+    void delfrends();                                        //删除好友(服务器)
 };
 void logafter::addfrendc()
 {
@@ -72,9 +82,9 @@ void logafter::addfrendc()
         User ret;
         recvMsg(socket, temp);
         ret.jsonparse(temp);
-       // cout << "你已成功添------" << ret.getname() << "-------为好友" << endl;
-       // cout << "他的账号为:  " << ret.getUID() << endl;
-       cout<<"你已成功发出好友申请，等待"<<ret.getname()<<"的同意"<<endl;
+        // cout << "你已成功添------" << ret.getname() << "-------为好友" << endl;
+        // cout << "他的账号为:  " << ret.getUID() << endl;
+        cout << "你已成功发出好友申请，等待" << ret.getname() << "的同意" << endl;
     }
 }
 void logafter::addfrends()
@@ -99,10 +109,10 @@ void logafter::addfrends()
     sendMsg(socket, "1"); //给客户端信号(好友存在)
     //判断对方是否在线
     // if(!r.sismember(""))
-    r.saddvalue("addfrend",UID);//加入消息缓冲区
-    string p=UID+"addfrend";
-    r.saddvalue(p,people.getUID());
-    //r.saddvalue(people.getfrend(), UID);
+    r.saddvalue("addfrend", UID); //加入消息缓冲区
+    string p = UID + "addfrend";
+    r.saddvalue(p, people.getUID());
+    // r.saddvalue(people.getfrend(), UID);
     sendMsg(socket, json);
 }
 
@@ -179,6 +189,7 @@ void logafter::sendmsgs() //发送消息(服务器) 私人聊天
     redisReply **arr;
     Redis r; //打开数据库
     r.connect();
+    r.saddvalue("chating", people.getUID()); //正在聊天室当中的
     int ret = 0;
     //打印四条历史聊天记录
     //先接收索引
@@ -207,12 +218,14 @@ void logafter::sendmsgs() //发送消息(服务器) 私人聊天
         if (json == ABOURT || ret == 0) //自己退出私聊
         {
             sendMsg(socket, ABOURT);
+            r.sremvalue("chating", people.getUID());
             return;
         }
         mms.josnparse(json);
         string UID = mms.getUIDto();
         if (!r.hashexists("islog", UID)) //如果对方不在线
         {
+            r.hsetValue("chat", UID, mms.getname());
             // printf("不在线\n");
             string pp = mms.getUIDfrom() + mms.getUIDto(); //历史消息记录存放索引
             string pp2 = mms.getUIDto() + mms.getUIDfrom();
@@ -221,6 +234,16 @@ void logafter::sendmsgs() //发送消息(服务器) 私人聊天
         }
         else //如果对方在线，直接进行消息发送
         {
+            //判断是否在聊天室当中
+            if (!r.sismember("chating", UID)) //如果不在
+            {
+                r.hsetValue("chat", UID, mms.getname());
+                string pp = mms.getUIDfrom() + mms.getUIDto(); //历史消息记录存放索引
+                string pp2 = mms.getUIDto() + mms.getUIDfrom();
+                r.lpush(pp, json);
+                r.lpush(pp2, json);
+                continue;
+            }
             //先获取套接字
             string ffd = r.gethash("islog", UID);
             int fd = stoi(ffd);
@@ -240,15 +263,15 @@ void logafter::showfrends() //查询好友信息(服务器)
     r.connect();
     //接受要查询的好友个数
     string temp;
-    int ret=recvMsg(socket, temp);
-    if(ret==0)
-    return ;
+    int ret = recvMsg(socket, temp);
+    if (ret == 0)
+        return;
     int len = stoi(temp);
     for (int i = 0; i < len; i++) //循环查询好友在线状况
     {
         recvMsg(socket, temp); //接收好友账号
-        //后面对是否在线进行查询
-         ret = r.hashexists("islog", temp);
+                               //后面对是否在线进行查询
+        ret = r.hashexists("islog", temp);
         if (ret == 0) //不在线
             sendMsg(socket, "0");
         else //在线
@@ -290,7 +313,7 @@ void logafter::searchfredc(vector<pair<string, User>> &myfrends) //查询好友�
 {
     system("clear");
     showfrendc(myfrends);
-   // sendMsg(socket, SHOWFREND);
+    // sendMsg(socket, SHOWFREND);
     cout << "请选择要查看信息的好友：" << endl;
     int i;
     cin >> i;
@@ -332,9 +355,9 @@ void logafter::findhistoryc(vector<pair<string, User>> &myfrends) //查看历史
     i--;
     //发送你要查看对象的UID
     sendMsg(socket, myfrends[i].second.getUID());
-    int ret=recvMsg(socket, temp); //接受数量
-    if(ret==0)
-    return;
+    int ret = recvMsg(socket, temp); //接受数量
+    if (ret == 0)
+        return;
     len = stoi(temp);
     message mess;
     if (len == 0)
@@ -372,4 +395,164 @@ void logafter::findhistorys() //查看历史消息记录(服务器)
         sendMsg(socket, arr[i]->str); //发送聊天记录
     }
 }
+
+void logafter::findfrendc(vector<pair<string, User>> &myfrends) //查看好友申请
+{
+    sendMsg(socket, FINDFREND);
+    string temp;
+    recvMsg(socket, temp);
+    int len = stoi(temp);
+    if (len == 0)
+    {
+        printf("暂未收到好友申请,输入任意字符退出\n");
+        cin >> temp;
+        system("clear");
+        return;
+    }
+    else
+    {
+        cout << "你收到" << len << "条好友申请" << endl;
+        for (int i = 0; i < len; i++)
+        {
+            recvMsg(socket, temp); //接收对象昵称
+            cout << "收到" << temp << "的好友添加申请，请做出选择[YES/NO]";
+        flag:
+            cin >> temp;
+            if (temp != "YES" && temp != "NO")
+            {
+                cout << "\033[1m\033[31m\033[11m警告输入错误,只能输入YES或NO\033[0m" << endl;
+                cout << "请重新输入:" << endl;
+                goto flag;
+            }
+            sendMsg(socket, temp); //发送选择
+            if (temp == "YES")
+            {
+                cout << "好友添加成功" << endl;
+                string json;
+                User pc;
+                recvMsg(socket, json);
+                pc.jsonparse(json);
+                myfrends.push_back(pair<string, User>(people.getUID(), pc)); //将好友信息加载到本地内存中
+            }
+            else
+            {
+                cout << "你已成功拒绝添加对方为好友" << endl;
+            }
+        }
+    }
+}
+
+void logafter::findfrends() //查看好友申请
+{
+    //查询是否有好友申请
+    Redis r;
+    r.connect();
+    string temp = people.getUID() + "addfrend";
+    int len = r.scard(temp);
+    sendMsg(socket, to_string(len)); //发送好友申请的数量
+    User pp;                         //暂存
+    if (len == 0)                    //暂时没有好友申请
+    {
+        return;
+    }
+    else
+    {
+        redisReply **arr = r.smembers(temp); //得到申请人的UID
+        for (int i = 0; i < len; i++)
+        {
+            temp = r.gethash("peopleinfo", arr[i]->str);
+            pp.jsonparse(temp);
+            sendMsg(socket, pp.getname());
+            recvMsg(socket, temp); //接受对面的选择(YES/NO)
+            if (temp == "NO")      //拒绝
+            {
+                return;
+            }
+            else //同意
+            {
+                r.saddvalue(pp.getfrend(), people.getUID()); //添加到好友列表中
+                r.saddvalue(people.getfrend(), pp.getUID()); //添加到好友列表中
+                //从缓冲区中删除
+                temp = people.getUID() + "addfrend";
+                r.sremvalue(temp, arr[i]->str); //删除
+                sendMsg(socket, pp.tojson());
+            }
+        }
+    }
+}
+
+void logafter::flushc(vector<pair<string, User>> &myfrends) //刷新一下(客户端)
+{
+    sendMsg(socket,FLUSH);//刷新
+    string temp;
+    User ttemp;
+    //清空本地
+    myfrends.clear();
+    recvMsg(socket,temp);
+    int len=stoi(temp);
+    for(int i=0;i<len;i++) //循环接收
+    {
+        recvMsg(socket, temp);
+        ttemp.jsonparse(temp);
+        myfrends.push_back(pair<string, User>(people.getUID(), ttemp));
+    }
+    system("clear");
+    cout<<"刷新成功"<<endl;
+}
+
+void logafter::flushs() //刷新一下(服务器)
+{
+    Redis r;
+    r.connect();
+    int len=r.scard(people.getfrend());
+    sendMsg(socket,to_string(len));
+    redisReply**arr=r.smembers(people.getfrend());
+    //循环发送
+    for(int i=0;i<len;i++)
+    {
+        string json;
+        json = r.gethash("peopleinfo", arr[i]->str);
+        sendMsg(socket, json);
+    }
+}
+void logafter::delfrendc(vector<pair<string, User>> &myfrends) //删除好友(客户端)
+{
+    sendMsg(socket,DELFREND);//删除好友
+    cout<<"        "<<people.getname()<<"的好友列表"<<endl;
+    cout<<"--------------------------"<<endl;
+    for(int i=0;i<myfrends.size();i++)
+    {
+        cout<<i+1<<" . "<<myfrends[i].second.getname()<<endl;
+    }
+    cout<<"--------------------------"<<endl;
+    cout<<"请选择你要删除的好友:";
+    int i;
+    cin>>i;
+    i--;
+    sendMsg(socket,myfrends[i].second.getUID());//发送要删除好友的UID
+
+
+
+
+
+}
+void logafter::delfrends() //删除好友(服务器)
+{
+    Redis r;
+    r.connect();
+    string UID;
+    //接受要删除好友的UID
+    recvMsg(socket,UID);
+    User frend;
+    string json;
+    json=r.gethash("peopleinfo",UID);
+    frend.jsonparse(json);
+    r.sremvalue(people.getfrend(),UID);//从自己方删除好友
+    r.sremvalue(frend.getfrend(),people.getUID());//从好友方删除自己
+    r.ltrim(people.getUID()+frend.getUID());// 删除聊天记录
+    r.ltrim(frend.getUID()+people.getUID());
+    //通知对面被某某删除(建一个删除缓冲区)
+    r.saddvalue(frend.getUID()+"del",people.getname());
+}
+
 #endif

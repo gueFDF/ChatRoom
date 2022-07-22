@@ -42,6 +42,7 @@ public:
     int llen(const string &key);
     redisReply **lrange(const string &key);                     //返回所有消息
     redisReply **lrange(const string &key, string a, string b); //返回指定的消息记录
+    int ltrim(const string &key);                              //删除链表中的所有元素
 
 private:
     string m_addr;        // IP地址
@@ -195,9 +196,16 @@ redisReply **Redis::lrange(const string &key) //返回所有消息
 
 redisReply **Redis::lrange(const string &key, string a, string b) //返回指定的消息记录
 {
-    string cmd = "lrange  " + key + "  "+a + "  "+b;
+    string cmd = "lrange  " + key + "  " + a + "  " + b;
     pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
     return pm_rr->element;
+}
+
+int  Redis::ltrim(const string &key) //删除链表中的所有元素
+{
+    string cmd = "ltrim  " + key + " 1 " + " 0 ";
+    pm_rr = (redisReply *)redisCommand(pm_rct, cmd.c_str());
+    return pm_rr->type;
 }
 
 #endif

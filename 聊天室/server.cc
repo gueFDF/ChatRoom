@@ -1,14 +1,14 @@
 #include <iostream>
 #include <cstring>
-#include<unistd.h>
-#include<fcntl.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <sys/epoll.h>
 #include <map>
 #include "Sock.hpp"
 #include "myredis.hpp"
 #include "login.hpp"
 #include "threadpool.hpp"
-#define PORT 9998
+#define PORT 9999
 #define LISTEN 1024
 #define EPOLL 1024
 int main()
@@ -21,8 +21,8 @@ int main()
     int ret = 1; //接收返回值
     string buf;
     int sockfd = Sock::Socket();
-     int opt=1;
-    setsockopt(sockfd,SOL_SOCKET ,SO_REUSEADDR,(void *)&opt,sizeof(int));//端口复用
+    int opt = 1;
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof(int)); //端口复用
     Sock::Bind(sockfd, PORT);
     Sock::Listen(sockfd, LISTEN);
     int efd = epoll_create(EPOLL);
@@ -70,21 +70,11 @@ int main()
                     task.arg = arg;
                     threadpool.addTask(task);
                 }
-                else if(buf==THREAD)
+                else if (buf == THREAD) //读取缓冲区消息
                 {
-                    Redis r;
-                    r.connect();
-                    string UID;
-                    recvMsg(ep[i].data.fd,UID);
-                    if(r.sismember("addfrend",UID))//判断是否有消息
-                    {
-                        sendMsg(ep[i].data.fd,ISHAVEFRENDADD);
-                        r.sremvalue("addfrend",UID);
-                    }
-                    else
-                    {
-                        sendMsg(ep[i].data.fd,"NO");
-                    }
+                    cout<<"服务器"<<endl;
+                    int arg[] = {ep[i].data.fd, efd};
+                    history(arg);
                 }
             }
         }
