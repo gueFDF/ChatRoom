@@ -72,7 +72,7 @@ int recvMsg(int fd,string&msg)
   int len=0;
   readn(fd,(char*)&len,4);
   len=ntohl(len);
-  printf("接收到的 数据块大小 %d\n",len);
+  //printf("接收到的 数据块大小 %d\n",len);
   char * data=(char*)malloc(len+1);
   int Len=readn(fd,data,len);
   if(Len==0)

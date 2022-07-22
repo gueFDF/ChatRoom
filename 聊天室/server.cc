@@ -8,7 +8,7 @@
 #include "myredis.hpp"
 #include "login.hpp"
 #include "threadpool.hpp"
-#define PORT 9997
+#define PORT 9998
 #define LISTEN 1024
 #define EPOLL 1024
 int main()
@@ -69,6 +69,22 @@ int main()
                     task.function = regser;
                     task.arg = arg;
                     threadpool.addTask(task);
+                }
+                else if(buf==THREAD)
+                {
+                    Redis r;
+                    r.connect();
+                    string UID;
+                    recvMsg(ep[i].data.fd,UID);
+                    if(r.sismember("addfrend",UID))//判断是否有消息
+                    {
+                        sendMsg(ep[i].data.fd,ISHAVEFRENDADD);
+                        r.sremvalue("addfrend",UID);
+                    }
+                    else
+                    {
+                        sendMsg(ep[i].data.fd,"NO");
+                    }
                 }
             }
         }

@@ -3,8 +3,8 @@
 using namespace std;
 int main()
 {
-    string name ;
-    /* redisContext* r;
+    /*string name ;
+     redisContext* r;
      redisReply* p;
      r=redisConnect("127.0.0.1",6379);
      p=(redisReply*)redisCommand(r,"lrange mylist 0 0");
@@ -12,7 +12,7 @@ int main()
     cout << "\033[1m\033[30m"
          << "楚梦凡" << endl;
     cout<<"\033[1m\033[33m"<<"楚梦凡"<<"\033[0m"<<endl;
-    cin>>name;
+    //cin>>name;
     cout << "\033[1m\033[31m\033[11m"
          << "楚梦凡" << endl;
     cout << "\033[1m\033[32m\033[12m"
@@ -25,4 +25,7 @@ int main()
          << "楚梦凡" << endl;
     cout << "\033[1m\033[36m\033[16m"
          << "楚梦凡" << endl;
+         char a='*';
+          cout<<a<<endl;
+         cout<<"\033[1m\033[32m\033[12m"<<a<<endl;
 }

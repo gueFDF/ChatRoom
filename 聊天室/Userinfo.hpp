@@ -48,6 +48,10 @@ public:
     {
         name = na;
     }
+    string getmytime()
+    {
+        return my_time;
+    }
     string getname()
     {
         return name;

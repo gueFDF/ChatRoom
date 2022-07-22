@@ -11,7 +11,7 @@
 #include "loginmessage.hpp"
 #include "Userinfo.hpp"
 #include "loginafter.hpp"
-#include"message.hpp"
+#include "message.hpp"
 using namespace std;
 
 void afterloginc(int fd, User &tem);
@@ -27,13 +27,16 @@ void menulogin()
 
 void messagemenu()
 {
+    cout << "                  聊天室                    " << endl;
     cout << "-----------------------------------------" << endl;
-    cout << "----------------1.私聊------------------" << endl;
-    cout << "----------------2.群聊------------------" <<endl;
-    cout << "----------------3.加好友------------------" << endl;
-    cout << "----------------4.查询好友信息------------------" << endl;
-    cout << "----------------5.查看好友列表-------------" << endl;
-    cout << "----------------6.注销账号----------------" << endl;
+    cout << "                1.私聊                   " << endl;
+    cout << "                2.群聊                   " << endl;
+    cout << "                3.加好友                 " << endl;
+    cout << "                4.查看历史聊天记录         " << endl;
+    cout << "                5.查询好友信息            " << endl;
+    cout << "                6.查看好友列              " << endl;
+    cout << "                7.注销账号                " << endl;
+    cout << "------------------------------------------" << endl;
 }
 
 void regclier(int socket) //注册账号(客户端)
@@ -62,9 +65,9 @@ flag:
     temp = peope.tojson();
     sendMsg(socket, temp);
     recvMsg(socket, temp);
-    //sleep(1);
-    //system("clear");
-    //sleep(1);
+    // sleep(1);
+    // system("clear");
+    // sleep(1);
     cout << "账号注册成功" << endl;
     cout << "你的账号为:" << temp << endl;
     return;
@@ -118,10 +121,15 @@ int logincli(int fd, User &people) //登录(客户端)
             cout << "密码错误,请重新输入" << endl;
             return 0;
         }
+        else if (buf == "-3")
+        {
+            cout << "该用户在异地登陆中" << endl;
+            return 0;
+        }
         else
         {
-            //sleep(1);
-            //system("clear");
+            // sleep(1);
+            // system("clear");
             cout << "登录成功" << endl;
             recvMsg(fd, buf);
             people.jsonparse(buf);
@@ -166,6 +174,12 @@ void loginser(void *arg) //登录(服务器)
             epoll_ctl(efd, EPOLL_CTL_ADD, fd, &temp);
             return;
         }
+        else if (r.hashexists("islog", UID)) //此用户正在登录
+        {
+            sendMsg(fd, "-3");
+            epoll_ctl(efd, EPOLL_CTL_ADD, fd, &temp);
+            return;
+        }
         else
         {
             sendMsg(fd, "1");
@@ -181,6 +195,8 @@ void loginser(void *arg) //登录(服务器)
 //登录后操作(用户)
 void afterloginc(int fd, User &tem)
 {
+     pthread_t tid;
+     pthread_create(&tid,NULL,worker2,(void*)&tem);
     //先把好友加载到本地
     //现接收好友个数
     string temp;
@@ -193,8 +209,8 @@ void afterloginc(int fd, User &tem)
     {
         recvMsg(fd, temp);
         ttemp.jsonparse(temp);
-        cout<<ttemp.getname()<<" : "<<ttemp.getUID()<<endl;
-       // cout<<ttemp.getfrend()<<" : "<<ttemp.getUID()<<endl;
+        cout << ttemp.getname() << " : " << ttemp.getUID() << endl;
+        // cout<<ttemp.getfrend()<<" : "<<ttemp.getUID()<<endl;
         myfrends.push_back(pair<string, User>(tem.getUID(), ttemp));
     }
     logafter people(fd, tem);
@@ -202,8 +218,8 @@ void afterloginc(int fd, User &tem)
 
     do
     {
-        //sleep(1);
-        //system("clear");
+        // sleep(1);
+        // system("clear");
         messagemenu(); //打印登录后的界面
         cout << "请输入你的选择:" << endl;
         cin >> p;
@@ -218,6 +234,16 @@ void afterloginc(int fd, User &tem)
             people.addfrendc();
             break;
         case 4:
+            people.findhistoryc(myfrends);
+            break;
+        case 5:
+            people.searchfredc(myfrends);
+            break;
+        case 6:
+            people.showfrendc(myfrends);
+            cout << "输入任意字符退出" << endl;
+            cin >> temp;
+            system("clear");
             break;
         case 0:
             sendMsg(fd, LOGOUT);
@@ -258,6 +284,14 @@ void afterlogins(int fd, User &tem)
         if (temp == TOMSG) //私聊
         {
             tt.sendmsgs();
+        }
+        if (temp == SHOWFREND) //查看好友列表
+        {
+            tt.showfrends();
+        }
+        if (temp == HISTORY) //查看历史消息
+        {
+            tt.findhistorys();
         }
     } while (temp != LOGOUT && ret != 0);
     r.hashdel("islog", tem.getUID());
