@@ -72,7 +72,6 @@ int main()
                 }
                 else if (buf == THREAD) //读取缓冲区消息
                 {
-                    cout<<"服务器"<<endl;
                     int arg[] = {ep[i].data.fd, efd};
                     history(arg);
                 }

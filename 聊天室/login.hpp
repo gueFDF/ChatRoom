@@ -330,10 +330,10 @@ void history(void *arg)
     Redis r;
     r.connect();
     string UID;
-    User people;
+   // User people;
     recvMsg(fd, UID);
-    string json = r.gethash("peopleinfo", UID);
-    people.jsonparse(json);
+  //  string json = r.gethash("peopleinfo", UID);
+   // people.jsonparse(json);
     if (r.sismember("addfrend", UID)) //判断是否有好友添加
     {
         sendMsg(fd, ISHAVEFRENDADD);
@@ -362,9 +362,8 @@ void history(void *arg)
         redisReply **arr = r.smembers(UID + "del");
         for (int i = 0; i < len; i++)
         {
-
-            sendMsg(fd, people.getname());
-            r.sremvalue(UID+"del",people.getUID());
+            sendMsg(fd, arr[i]->str);
+            r.sremvalue(UID+"del",arr[i]->str);
         }
         
     }
