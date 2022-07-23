@@ -8,7 +8,7 @@
 #include "myredis.hpp"
 #include "login.hpp"
 #include "threadpool.hpp"
-#define PORT 9999
+#define PORT 9998
 #define LISTEN 1024
 #define EPOLL 1024
 int main()
@@ -22,7 +22,7 @@ int main()
     string buf;
     int sockfd = Sock::Socket();
     int opt = 1;
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof(int)); //端口复用
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, (void *)&opt, sizeof(int)); //端口复用
     Sock::Bind(sockfd, PORT);
     Sock::Listen(sockfd, LISTEN);
     int efd = epoll_create(EPOLL);

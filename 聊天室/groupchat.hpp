@@ -175,7 +175,7 @@ void groupchat::Flushc(vector<group> &mygroup, vector<group> &myleader, vector<g
     myleader.clear();
     mycreate.clear();
     string temp;
-    sendMsg(socket, FLUSH);
+   // sendMsg(socket, FLUSH);
 
     //我加入的
     recvMsg(socket, temp);
@@ -262,14 +262,8 @@ void groupchat::addgroups() //加入群聊(服务器)
     cout << r.hashexists("groupinfo", temp) << endl;
     if (r.hashexists("groupinfo", temp))
     {
-        // q群存在
-        //  cout<<"sfdsdfsdfsd"<<endl;
-        //  sendMsg(socket, "-1"); // 账号不存在
-        //  return;
         if (!r.sismember(joingroup, temp))
         {
-            // sendMsg(socket, "-2"); // 已加入
-            // return;
             sendMsg(socket, "1");
             //存入数据库等待群管理
             string json = r.gethash("groupinfo", temp);
@@ -285,23 +279,10 @@ void groupchat::addgroups() //加入群聊(服务器)
     }
     else
     {
-        cout << "sfdsdfsdfsd" << endl;
         sendMsg(socket, "-1"); // 账号不存在
         // return;
     }
-    // if (r.sismember(joingroup, temp))
-    // {
-    //     sendMsg(socket, "-2"); // 已加入
-    //     return;
-    // }
-    // cout << "aaaaaaaaaaaaaaaaaaaaaaaa" << endl;
-    // sendMsg(socket, "1");
-    // //存入数据库等待群管理
-    // string json = r.gethash("groupinfo", temp);
-    // group p;
-    // p.jsonprase(json);
-    // r.saddvalue("ifadd" + p.getuid(), people.getUID());
-    //等待管理员或群主同意
+
 }
 void groupchat::addgroupc() //加入群聊(客户端)
 {
@@ -334,12 +315,9 @@ void groupchat::addgroupc() //加入群聊(客户端)
 
 void groupchat::cltmygroups() //管理我的群
 {
-    cout << "12313142342343254345" << endl;
     group p;
     string json;
-    sendMsg(socket, json);
-    cout << json << endl;
-    cout << "12313142342343254345" << endl;
+    recvMsg(socket, json);
     p.jsonprase(json);
     string sel;
     int ret;
@@ -371,8 +349,10 @@ void groupchat::cltmygroupc(vector<group> &myleader) //管理我的群
     int i;
     cin >> i;
     i--;
-    sendMsg(socket, myleader[i].tojson()); //解析成json串发送给服务器
-    cout << myleader[i].tojson() << endl;
+    string json;
+    json=myleader[i].tojson();
+    sendMsg(socket,json); //解析成json串发送给服务器
+    //cout << myleader[i].tojson() << endl;
     // system("clear");
 
     int sel;
@@ -403,7 +383,6 @@ void groupchat::agreeaddc()
     sendMsg(socket, AGREEADD);
     string buf;
     recvMsg(socket, buf);
-    cout << buf << " 374" << endl;
     int len = stoi(buf);
     if (len == 0)
     {
@@ -445,7 +424,6 @@ void groupchat::agreeaddc()
 }
 void groupchat::agreeadds(group &g)
 {
-    cout << "dfsdfsdfs" << endl;
     Redis r;
     r.connect();
     int ret = r.scard("ifadd" + g.getuid());
@@ -462,7 +440,6 @@ void groupchat::agreeadds(group &g)
             buf = r.gethash("peopleinfo", arr[i]->str);
             temp.jsonparse(buf);
             sendMsg(socket, temp.getname()); //发送名字
-            cout << temp.getname() << endl;
             recvMsg(socket, buf); //接收对面的选择
             if (buf == "NO")
             {

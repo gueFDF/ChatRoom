@@ -33,7 +33,7 @@ void *worker2(void *arg)
 {
     User people = *(User *)arg;
     int socket = Sock::Socket();
-    Sock::Connect(socket, "127.0.0.1", 9999);
+    Sock::Connect(socket, "127.0.0.1", 9998);
     while (1)
     {
         sendMsg(socket, THREAD);
