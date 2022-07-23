@@ -23,19 +23,23 @@
 #define SHOWMYADD "22"      //展示我加入的群聊
 #define SHOWMYCTL "23"      //展示我管理的群聊
 #define ADDGROUP "24"       //加入群聊
+#define CTLMYGROUP "25"     //管理自己的群
+#define DELGROUPPEOPLE "26" //删除群成员
+#define AGREEADD "27"       //处理加群申请
 #include "login.hpp"
 #include "work.hpp"
 #include "groupchat.hpp"
 
 void menugruop()
 {
-    cout << "                  1.创建群聊                   " << endl;
-    cout << "                  2.发起群聊                   " << endl;
-    cout << "                  3.加入群聊                   " << endl;
-    cout << "                  4.查看我加入的群               " << endl;
-    cout << "                  5.查看我创建的群                   " << endl;
-    cout << "                  6.查看我管理的群                " << endl;
-    cout << "                  0.退出                        " << endl;
+    cout << "                  1.创建群聊      " << endl;
+    cout << "                  2.发起群聊      " << endl;
+    cout << "                  3.加入群聊      " << endl;
+    cout << "                  4.查看我加入的群 " << endl;
+    cout << "                  5.查看我创建的群 " << endl;
+    cout << "                  6.查看我管理的群 " << endl;
+    cout << "                  7.管理我的群    " << endl;
+    cout << "                  0.退出         " << endl;
 }
 
 class logafter
@@ -488,6 +492,10 @@ void logafter::findfrends() //查看好友申请
             recvMsg(socket, temp); //接受对面的选择(YES/NO)
             if (temp == "NO")      //拒绝
             {
+                //从缓冲区中删除
+                temp = people.getUID() + "addfrend";
+                r.sremvalue(temp, arr[i]->str); //删除
+                sendMsg(socket, pp.tojson());
                 return;
             }
             else //同意
@@ -607,6 +615,9 @@ void logafter::groupc() //群聊
         case 6:
             p.sjowmyctlc(myleader);
             break;
+        case 7:
+            p.cltmygroupc(myleader);
+            break;
         case 0:
             sendMsg(socket, LOGOUT);
             break;
@@ -636,11 +647,16 @@ void logafter::groups() //群聊
         {
             tt.Flushs();
         }
-        if(se==ADDGROUP)
+        if (se == ADDGROUP)
         {
             tt.addgroups();
+        }
+        if (se == CTLMYGROUP)
+        {
+            tt.cltmygroups();
         }
 
     } while (se != LOGOUT && ret != 0);
 }
+
 #endif

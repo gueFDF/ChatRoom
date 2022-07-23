@@ -49,6 +49,7 @@ int main()
                 flag |= O_NONBLOCK;
                 fcntl(cfd, F_SETFL, flag); //设置非阻塞*/
                 epoll_ctl(efd, EPOLL_CTL_ADD, cfd, &temp);
+                cout<<"对方已连接"<<endl;
             }
             else
             {
