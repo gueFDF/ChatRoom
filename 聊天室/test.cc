@@ -9,7 +9,7 @@ int main()
      r=redisConnect("127.0.0.1",6379);
      p=(redisReply*)redisCommand(r,"lrange mylist 0 0");
      cout<<p->element[0]->str<<endl;*/
-    cout << "\033[1m\033[30m"
+   /* cout << "\033[1m\033[30m"
          << "楚梦凡" << endl;
     cout<<"\033[1m\033[33m"<<"楚梦凡"<<"\033[0m"<<endl;
     //cin>>name;
@@ -27,5 +27,11 @@ int main()
          << "楚梦凡" << endl;
          char a='*';
           cout<<a<<endl;
-         cout<<"\033[1m\033[32m\033[12m"<<a<<endl;
+         cout<<"\033[1m\033[32m\033[12m"<<a<<endl;*/
+
+
+         string p="1234567";
+      //   p.replace(0,1,)
+      p[0]='5';
+         cout<<p<<endl;
 }

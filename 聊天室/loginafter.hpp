@@ -14,10 +14,30 @@
 #define ISHAVEFRENDADD "12" //客户端不断检查是否有好友添加
 #define ISHAVEMESSAGE "13"  //客户端不断检查是否有新消息
 #define FINDFREND "14"      //查看好友申请
-#define FLUSH     "15"    //刷新本地好友,列表
-#define DELFREND "16"   //删除好友
+#define FLUSH "15"          //刷新本地好友,列表
+#define DELFREND "16"       //删除好友
+#define GROUP "18"          //群聊
+#define CREATEGROUP "19"    //创建群聊
+#define SETLEADER "20"      //设置管理
+#define SHOWMYCREATE "21"   //展示自己创建的群聊
+#define SHOWMYADD "22"      //展示我加入的群聊
+#define SHOWMYCTL "23"      //展示我管理的群聊
+#define ADDGROUP "24"       //加入群聊
 #include "login.hpp"
 #include "work.hpp"
+#include "groupchat.hpp"
+
+void menugruop()
+{
+    cout << "                  1.创建群聊                   " << endl;
+    cout << "                  2.发起群聊                   " << endl;
+    cout << "                  3.加入群聊                   " << endl;
+    cout << "                  4.查看我加入的群               " << endl;
+    cout << "                  5.查看我创建的群                   " << endl;
+    cout << "                  6.查看我管理的群                " << endl;
+    cout << "                  0.退出                        " << endl;
+}
+
 class logafter
 {
 private:
@@ -52,9 +72,11 @@ public:
     void findfrendc(vector<pair<string, User>> &myfrends);   //查看好友申请(客户端)
     void findfrends();                                       //查看好友申请(服务器)
     void flushc(vector<pair<string, User>> &myfrends);       //刷新一下(客户端)
-    void flushs();       //刷新一下(服务器)
-    void delfrendc(vector<pair<string, User>> &myfrends);                                        //删除好友(客户端)
+    void flushs();                                           //刷新一下(服务器)
+    void delfrendc(vector<pair<string, User>> &myfrends);    //删除好友(客户端)
     void delfrends();                                        //删除好友(服务器)
+    void groupc();                                           //群聊
+    void groups();                                           //群聊
 };
 void logafter::addfrendc()
 {
@@ -483,32 +505,32 @@ void logafter::findfrends() //查看好友申请
 
 void logafter::flushc(vector<pair<string, User>> &myfrends) //刷新一下(客户端)
 {
-    sendMsg(socket,FLUSH);//刷新
+    sendMsg(socket, FLUSH); //刷新
     string temp;
     User ttemp;
     //清空本地
     myfrends.clear();
-    recvMsg(socket,temp);
-    int len=stoi(temp);
-    for(int i=0;i<len;i++) //循环接收
+    recvMsg(socket, temp);
+    int len = stoi(temp);
+    for (int i = 0; i < len; i++) //循环接收
     {
         recvMsg(socket, temp);
         ttemp.jsonparse(temp);
         myfrends.push_back(pair<string, User>(people.getUID(), ttemp));
     }
     system("clear");
-    cout<<"刷新成功"<<endl;
+    cout << "刷新成功" << endl;
 }
 
 void logafter::flushs() //刷新一下(服务器)
 {
     Redis r;
     r.connect();
-    int len=r.scard(people.getfrend());
-    sendMsg(socket,to_string(len));
-    redisReply**arr=r.smembers(people.getfrend());
+    int len = r.scard(people.getfrend());
+    sendMsg(socket, to_string(len));
+    redisReply **arr = r.smembers(people.getfrend());
     //循环发送
-    for(int i=0;i<len;i++)
+    for (int i = 0; i < len; i++)
     {
         string json;
         json = r.gethash("peopleinfo", arr[i]->str);
@@ -517,24 +539,19 @@ void logafter::flushs() //刷新一下(服务器)
 }
 void logafter::delfrendc(vector<pair<string, User>> &myfrends) //删除好友(客户端)
 {
-    sendMsg(socket,DELFREND);//删除好友
-    cout<<"        "<<people.getname()<<"的好友列表"<<endl;
-    cout<<"--------------------------"<<endl;
-    for(int i=0;i<myfrends.size();i++)
+    sendMsg(socket, DELFREND); //删除好友
+    cout << "        " << people.getname() << "的好友列表" << endl;
+    cout << "--------------------------" << endl;
+    for (int i = 0; i < myfrends.size(); i++)
     {
-        cout<<i+1<<" . "<<myfrends[i].second.getname()<<endl;
+        cout << i + 1 << " . " << myfrends[i].second.getname() << endl;
     }
-    cout<<"--------------------------"<<endl;
-    cout<<"请选择你要删除的好友:";
+    cout << "--------------------------" << endl;
+    cout << "请选择你要删除的好友:";
     int i;
-    cin>>i;
+    cin >> i;
     i--;
-    sendMsg(socket,myfrends[i].second.getUID());//发送要删除好友的UID
-
-
-
-
-
+    sendMsg(socket, myfrends[i].second.getUID()); //发送要删除好友的UID
 }
 void logafter::delfrends() //删除好友(服务器)
 {
@@ -542,17 +559,88 @@ void logafter::delfrends() //删除好友(服务器)
     r.connect();
     string UID;
     //接受要删除好友的UID
-    recvMsg(socket,UID);
+    recvMsg(socket, UID);
     User frend;
     string json;
-    json=r.gethash("peopleinfo",UID);
+    json = r.gethash("peopleinfo", UID);
     frend.jsonparse(json);
-    r.sremvalue(people.getfrend(),UID);//从自己方删除好友
-    r.sremvalue(frend.getfrend(),people.getUID());//从好友方删除自己
-    r.ltrim(people.getUID()+frend.getUID());// 删除聊天记录
-    r.ltrim(frend.getUID()+people.getUID());
+    r.sremvalue(people.getfrend(), UID);            //从自己方删除好友
+    r.sremvalue(frend.getfrend(), people.getUID()); //从好友方删除自己
+    r.ltrim(people.getUID() + frend.getUID());      // 删除聊天记录
+    r.ltrim(frend.getUID() + people.getUID());
     //通知对面被某某删除(建一个删除缓冲区)
-    r.saddvalue(frend.getUID()+"del",people.getname());
+    r.saddvalue(frend.getUID() + "del", people.getname());
 }
 
+void logafter::groupc() //群聊
+{
+    sendMsg(socket, GROUP);
+    int select;
+    groupchat p(people, socket);
+    vector<group> mygroup;  //我加入的
+    vector<group> mycreate; //我创建的
+    vector<group> myleader; //我管理的
+    do
+    {
+        p.Flushc(mygroup, myleader, mycreate);
+        system("clear");
+        cout << people.getname() << "的聊天室" << endl;
+        menugruop();
+        cout << "请输入你的选择:";
+        cin >> select;
+        switch (select)
+        {
+        case 1:
+            p.creategroupc();
+            break;
+        case 2:
+            break;
+        case 3:
+            p.addgroupc();
+            break;
+        case 4:
+            p.showaddc(mygroup);
+            break;
+        case 5:
+            p.showmycreatc(mycreate);
+            break;
+        case 6:
+            p.sjowmyctlc(myleader);
+            break;
+        case 0:
+            sendMsg(socket, LOGOUT);
+            break;
+        default:
+            cout << "选择错误" << endl;
+            break;
+        }
+    } while (select);
+}
+
+void logafter::groups() //群聊
+{
+    Redis r;
+    r.connect();
+    int ret;
+    groupchat tt(people, socket);
+    string se;
+    do
+    {
+        tt.Flushs();
+        ret = recvMsg(socket, se);
+        if (se == CREATEGROUP)
+        {
+            tt.creategroups();
+        }
+        if (se == FLUSH)
+        {
+            tt.Flushs();
+        }
+        if(se==ADDGROUP)
+        {
+            tt.addgroups();
+        }
+
+    } while (se != LOGOUT && ret != 0);
+}
 #endif

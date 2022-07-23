@@ -12,10 +12,13 @@
 #include "Userinfo.hpp"
 #include "loginafter.hpp"
 #include "message.hpp"
+#include"groupchat.hpp"
 using namespace std;
 
 void afterloginc(int fd, User &tem);
 void afterlogins(int fd, User &tem);
+
+
 void menulogin()
 {
     cout << "--------------------------------------" << endl;
@@ -39,8 +42,10 @@ void messagemenu()
     cout << "                7.删除好友                " << endl;
     cout << "                8.刷新                   " << endl;
     cout << "                9.注销账号                " << endl;
+    cout << "                10.群聊                   " << endl;
     cout << "------------------------------------------" << endl;
 }
+
 
 void regclier(int socket) //注册账号(客户端)
 {
@@ -253,6 +258,9 @@ void afterloginc(int fd, User &tem)
         case 8:
             people.flushc(myfrends);
             break;
+        case 10:
+            people.groupc();
+            break;
         case 0:
             sendMsg(fd, LOGOUT);
             cout << "退出成功" << endl;
@@ -313,6 +321,10 @@ void afterlogins(int fd, User &tem)
         {
             tt.delfrends();
         }
+        if (temp == GROUP) //群聊
+        {
+            tt.groups();
+        }
     } while (temp != LOGOUT && ret != 0);
     r.hashdel("islog", tem.getUID());
 }
@@ -330,10 +342,10 @@ void history(void *arg)
     Redis r;
     r.connect();
     string UID;
-   // User people;
+    // User people;
     recvMsg(fd, UID);
-  //  string json = r.gethash("peopleinfo", UID);
-   // people.jsonparse(json);
+    //  string json = r.gethash("peopleinfo", UID);
+    // people.jsonparse(json);
     if (r.sismember("addfrend", UID)) //判断是否有好友添加
     {
         sendMsg(fd, ISHAVEFRENDADD);
@@ -363,9 +375,8 @@ void history(void *arg)
         for (int i = 0; i < len; i++)
         {
             sendMsg(fd, arr[i]->str);
-            r.sremvalue(UID+"del",arr[i]->str);
+            r.sremvalue(UID + "del", arr[i]->str);
         }
-        
     }
     epoll_ctl(efd, EPOLL_CTL_ADD, fd, &temp);
 }
