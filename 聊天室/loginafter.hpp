@@ -26,6 +26,7 @@
 #define CTLMYGROUP "25"     //管理自己的群
 #define DELGROUPPEOPLE "26" //删除群成员
 #define AGREEADD "27"       //处理加群申请
+#define GROUPCHAT "28"      //群聊
 #include "login.hpp"
 #include "work.hpp"
 #include "groupchat.hpp"
@@ -39,6 +40,7 @@ void menugruop()
     cout << "                  5.查看我创建的群 " << endl;
     cout << "                  6.查看我管理的群 " << endl;
     cout << "                  7.管理我的群    " << endl;
+    cout << "                  8.刷新    " << endl;
     cout << "                  0.退出         " << endl;
 }
 
@@ -590,7 +592,6 @@ void logafter::groupc() //群聊
     vector<group> myleader; //我管理的
     do
     {
-        p.Flushc(mygroup, myleader, mycreate);
         system("clear");
         cout << people.getname() << "的聊天室" << endl;
         menugruop();
@@ -602,6 +603,7 @@ void logafter::groupc() //群聊
             p.creategroupc();
             break;
         case 2:
+            p.groupchatc(mygroup);
             break;
         case 3:
             p.addgroupc();
@@ -617,6 +619,9 @@ void logafter::groupc() //群聊
             break;
         case 7:
             p.cltmygroupc(myleader);
+            break;
+        case 8:
+            p.Flushc(mygroup, myleader, mycreate);
             break;
         case 0:
             sendMsg(socket, LOGOUT);
@@ -637,7 +642,7 @@ void logafter::groups() //群聊
     string se;
     do
     {
-        tt.Flushs();
+
         ret = recvMsg(socket, se);
         if (se == CREATEGROUP)
         {
@@ -655,7 +660,11 @@ void logafter::groups() //群聊
         {
             tt.cltmygroups();
         }
-        if(se==SHOWMYADD||se==SHOWMYCREATE||se==SHOWMYCTL)
+        if (se == GROUPCHAT)
+        {
+            tt.groupchats();
+        }
+        if (se == FLUSH)
         {
             tt.Flushs();
         }

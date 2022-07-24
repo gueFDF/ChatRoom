@@ -59,9 +59,11 @@ public:
     void addgroups();                          //加入群聊(服务器)
     void addgroupc();                          //加入群聊(客户端)
     void agreeadds(group &g);                  //同意申请(服务器)
-    void agreeaddc();                          //拒绝申请
+    void agreeaddc();                          //同意申请
     void delgrouppeoples();                    //踢人(服务器)
     void delgrouppeoplec();                    //踢人(客户端)
+    void groupchats();                         //群聊(服务器)
+    void groupchatc(vector<group> &mygroup);   //群聊(客户端)
 };
 
 void groupchat::creategroupc() //群的创建(客户端)
@@ -97,7 +99,6 @@ void groupchat::creategroups() //群的创建(服务器)
 
 void groupchat::showaddc(vector<group> &mygroup)
 {
-    sendMsg(socket, SHOWMYADD);
     if (mygroup.size() == 0)
     {
         cout << "你未加入任何群聊" << endl;
@@ -123,7 +124,6 @@ void groupchat::showaddc(vector<group> &mygroup)
 
 void groupchat::showmycreatc(vector<group> &mycreate) //我创建的群聊(客户端)
 {
-    sendMsg(socket, SHOWMYCREATE);
     if (mycreate.size() == 0)
     {
         cout << "你未加入任何群聊" << endl;
@@ -148,7 +148,6 @@ void groupchat::showmycreatc(vector<group> &mycreate) //我创建的群聊(客�
 }
 void groupchat::sjowmyctlc(vector<group> &myleader) //展示我管理的群聊(客户端)
 {
-    sendMsg(socket, SHOWMYCTL);
     if (myleader.size() == 0)
     {
         cout << "你未加入任何群聊" << endl;
@@ -174,6 +173,7 @@ void groupchat::sjowmyctlc(vector<group> &myleader) //展示我管理的群聊(�
 
 void groupchat::Flushc(vector<group> &mygroup, vector<group> &myleader, vector<group> &mycreate)
 {
+    sendMsg(socket,FLUSH);
     mygroup.clear();
     myleader.clear();
     mycreate.clear();
@@ -389,6 +389,8 @@ void groupchat::agreeaddc()
     sendMsg(socket, AGREEADD);
     string buf;
     recvMsg(socket, buf);
+    cout<<__LINE__<<__FILE__<<endl;
+    cout<<buf<<endl;
     int len = stoi(buf);
     if (len == 0)
     {
@@ -431,8 +433,6 @@ void groupchat::agreeadds(group &g)
     Redis r;
     r.connect();
     int ret = r.scard("ifadd" + g.getuid());
-    cout << g.getuid() << endl;
-    cout << "ret:" << ret << endl;
     sendMsg(socket, to_string(ret));
     string buf;
     User temp;
@@ -461,4 +461,121 @@ void groupchat::agreeadds(group &g)
         }
     }
 }
+
+void groupchat::groupchats() //群聊(服务器)
+{
+    Redis r;
+    r.connect();
+    r.saddvalue("groupchating", people.getUID()); //进入聊天室内
+    string buf;
+    recvMsg(socket, buf); //接受群消息
+    group p;
+    p.jsonprase(buf); //获得群信息
+                      /*
+                       打印历史聊天记录(后面实现)
+                      */
+    message mms;
+    int ret;
+    while (1) //开始聊天
+    {
+        ret = recvMsg(socket, buf);
+        if (buf == ABOURT || ret == 0) //自己退出私聊
+        {
+            sendMsg(socket, ABOURT);
+            r.sremvalue("groupchating", people.getUID());
+            return;
+        }
+        mms.josnparse(buf); //获得消息
+
+        //发给所有群成员
+        int len = r.scard(p.getmember());
+        if (len != 0)
+        {
+            r.lpush(p.getuid() + "chathy", buf); //现将消息放在缓冲区当中
+            mms.setUIDto1(p.getuid());
+            redisReply **arr = r.smembers(p.getmember());
+            // User temp;
+            string UIDto;
+            for (int i = 0; i < len; i++)
+            {
+                UIDto = arr[i]->str;
+                if (UIDto != people.getUID()) //防止自己发的消息自己会再次收到
+                {
+                    if (!r.hashexists("islog", UIDto)) //判断对方是否在线
+                    {
+                        r.hsetValue("chat", UIDto, p.getname()); // 消息提醒存在缓冲区当中
+                    }
+                    else //如果对面在线，判断是否在聊天室当中
+                    {
+                        //判断是否在聊天室当中
+                        if (!r.sismember("groupchating", UIDto)) //如果不在
+                        {
+                            r.hsetValue("chat", UIDto, p.getname());
+                            continue;
+                        }
+                        else //在聊天室当中
+                        {
+                            string ffd = r.gethash("islog", UIDto);
+                            int fd = stoi(ffd);
+                            sendMsg(fd, buf);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void groupchat::groupchatc(vector<group> &mygroup) //群聊(客户端)
+{
+    system("clear");
+    cout << people.getname() << "加入的群聊" << endl;
+    cout << "--------------------------------" << endl;
+    for (int i = 0; i < mygroup.size(); i++)
+    {
+        cout << i + 1 << " . " << mygroup[i].getname() << endl;
+    }
+    cout << "---------------------------------" << endl;
+    cout << "输入你要进的群: ";
+    int i;
+    cin >> i;
+    if (i <= 0 || i > mygroup.size())
+    {
+        cout << "输入错误，输入任意字符返回" << endl;
+        string buf;
+        cin >> buf;
+        system("clear");
+        return;
+    }
+    i--;
+    sendMsg(socket, GROUPCHAT);
+    sendMsg(socket, mygroup[i].tojson());
+    system("clear");
+    cout << "                " << mygroup[i].getname() << endl; //打印群昵称
+    cout << endl;
+    /*
+          打印历史聊天记录
+      */
+    pthread_t tid;
+    message mes(people.getname(), people.getUID());
+    mes.setgroupname(mygroup[i].getname());
+    pair<string, int> w(mygroup[i].getuid(), socket); //交给子线程去读
+    pthread_create(&tid, NULL, worker1, (void *)&w);
+    string m;
+    string json;
+    while (1)
+    {
+        cout << people.getname() << " : ";
+        cin >> m;
+        if (m == "quit") //退出聊天
+        {
+            sendMsg(socket, ABOURT);
+            break;
+        }
+        mes.setinformation(m);
+        json = mes.tojson();
+        sendMsg(socket, json);
+    }
+}
+
 #endif

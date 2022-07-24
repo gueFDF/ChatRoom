@@ -17,13 +17,26 @@ private:
     string UIDto;       //目标地址
     string information; //消息内容
     string my_time;     //时间
+    string groupname;   //群聊昵称(若不是群聊，此字段设置为1)
 public:
-    message(string name1 , string UIDfrom1,string UIDto1) : name(name1), UIDfrom(UIDfrom1),UIDto(UIDto1){};
+    message(string name1, string UIDfrom1, string UIDto1 = "", string p = "1") : name(name1), UIDfrom(UIDfrom1), UIDto(UIDto1), groupname(p){};
     message(){};
 
     string getname()
     {
         return name;
+    }
+    void setgroupname(string gpname)
+    {
+        groupname = gpname;
+    }
+    string getgroupname()
+    {
+        return groupname;
+    }
+    void setUIDto1(string gpname)
+    {
+        UIDto = gpname;
     }
     string getinfo()
     {
@@ -54,7 +67,7 @@ public:
     }
     void setinformation(string p)
     {
-        information=p;
+        information = p;
     }
     string tojson()
     {
@@ -65,6 +78,7 @@ public:
         root.append(UIDto);
         root.append(information);
         root.append(my_time);
+        root.append(groupname);
         FastWriter f;
         string json = f.write(root);
         return json;
@@ -80,6 +94,7 @@ public:
         UIDto = root[i++].asString();
         information = root[i++].asString();
         my_time = root[i++].asString();
+        groupname = root[i++].asString();
     }
 };
 #endif

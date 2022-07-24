@@ -19,13 +19,28 @@ void *worker1(void *arg)
             return NULL;
         }
         mss.josnparse(json);
-        if (mss.getUIDfrom() == UIDfrend)
-            cout << mss.getname() << " : " << mss.getinfo() << endl;
-        else
-            cout << "\033[1m\033[31m"
-                 << "           "
-                 << "收到一条来自" << mss.getname() << "的一条消息"
-                 << "\033[0m" << endl;
+
+        //判断消息类型(群消息还是私发)
+        if (mss.getgroupname() == "1") //私发
+        {
+            if (mss.getUIDfrom() == UIDfrend)
+                cout << mss.getname() << " : " << mss.getinfo() << endl;
+            else
+                cout << "\033[1m\033[31m"
+                     << "           "
+                     << "收到一条来自" << mss.getname() << "的一条消息"
+                     << "\033[0m" << endl;
+        }
+        else //群消息
+        {
+            if (mss.getUIDto() == UIDfrend)
+                cout << mss.getname() << " : " << mss.getinfo() << endl;
+            else
+                cout << "\033[1m\033[31m"
+                     << "           "
+                     << "收到一条来自" << mss.getname() << "的一条消息"
+                     << "\033[0m" << endl;
+        }
     }
 }
 
@@ -46,7 +61,7 @@ void *worker2(void *arg)
         }
         else
         {
-           // cout << "nofrend" << endl;
+            // cout << "nofrend" << endl;
         }
 
         recvMsg(socket, buf);
@@ -56,17 +71,17 @@ void *worker2(void *arg)
         }
         else
         {
-          //  cout << "nochat" << endl;
+            //  cout << "nochat" << endl;
         }
         //读被删消息
-        recvMsg(socket,buf);
-        int len=stoi(buf);
-        for(int i=0;i<len;i++)
+        recvMsg(socket, buf);
+        int len = stoi(buf);
+        for (int i = 0; i < len; i++)
         {
-            recvMsg(socket,buf);
-            cout<<"你已被"<<buf<<"删除,你们将不再是好友"<<endl;
+            recvMsg(socket, buf);
+            cout << "你已被" << buf << "删除,你们将不再是好友" << endl;
         }
-        
+
         sleep(1); //每隔一秒检查一次
     }
 }
