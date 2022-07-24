@@ -1,4 +1,6 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make: *** No rule to make target 'all'.  Stop.
+
 # GNU Make 4.2.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2016 Free Software Foundation, Inc.
@@ -6,7 +8,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat Jul 23 22:38:23 2022
+# Make data base, printed on Sun Jul 24 14:45:33 2022
 
 # Variables
 
@@ -47,7 +49,7 @@ VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_langu
 # environment
 _ = /usr/share/code/code
 # environment
-JOURNAL_STREAM = 8:53395
+JOURNAL_STREAM = 8:22482
 # environment
 XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
 # makefile (from 'makefile', line 1)
@@ -67,7 +69,7 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-MANAGERPID = 1874
+MANAGERPID = 1925
 # environment
 CLUTTER_IM_MODULE = fcitx
 # environment
@@ -85,7 +87,7 @@ GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
 GJS_DEBUG_OUTPUT = stderr
 # environment
-SESSION_MANAGER = local/gty-Lenovo-Legion-R7000P2021H:@/tmp/.ICE-unix/2084,unix/gty-Lenovo-Legion-R7000P2021H:/tmp/.ICE-unix/2084
+SESSION_MANAGER = local/gty-Lenovo-Legion-R7000P2021H:@/tmp/.ICE-unix/2137,unix/gty-Lenovo-Legion-R7000P2021H:/tmp/.ICE-unix/2137
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -95,7 +97,7 @@ VSCODE_LOG_STACK = false
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-INVOCATION_ID = 0d78c94c9cca4259a5eefe04bc558771
+INVOCATION_ID = fa04841904a64151a0e79299cdc2fc98
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -105,7 +107,7 @@ XDG_SESSION_DESKTOP = ubuntu
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 2574
+GIO_LAUNCHED_DESKTOP_FILE_PID = 2628
 # automatic
 %F = $(notdir $%)
 # environment
@@ -119,7 +121,7 @@ PWD = /home/gty/vscode/ChatRoom/聊天室
 # default
 .LOADED := 
 # environment
-SSH_AGENT_PID = 2041
+SSH_AGENT_PID = 2094
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
 # environment
@@ -157,7 +159,7 @@ SHLVL = 0
 # environment
 GNOME_SHELL_SESSION_MODE = ubuntu
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-de4146b6-7321-4584-bc46-39ff78d1fbbd.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-1897e893-472e-4972-80ca-03290556a6bf.sock
 # default
 MAKE_VERSION := 4.2.1
 # environment
@@ -169,6 +171,7 @@ LC_MONETARY = zh_CN.UTF-8
 # environment
 XDG_CURRENT_DESKTOP = Unity
 # automatic
+ 
 %D = $(patsubst %/,%,$(dir $%))
 # environment
 LC_TELEPHONE = zh_CN.UTF-8
@@ -229,7 +232,7 @@ LC_ADDRESS = zh_CN.UTF-8
 # environment
 LANG = C
 # environment
-VSCODE_PID = 2574
+VSCODE_PID = 2628
 # variable set hash-table stats:
 # Load=110/1024=11%, Rehash=0, Collisions=18/135=13%
 
@@ -278,9 +281,6 @@ client.cc:
 
 # Not a target:
 makefile:
- 
-make: *** No rule to make target 'all'.  Stop.
-
 #  Implicit rule search has been done.
 #  Last modified 2022-07-19 14:19:29.086718582
 #  File has been updated.
@@ -313,7 +313,8 @@ clean:
 
 # strcache performance: lookups = 39 / hit rate = 25%
 # hash-table stats:
+ 
 # Load=29/8192=0%, Rehash=0, Collisions=1/39=3%
-# Finished Make data base on Sat Jul 23 22:38:23 2022
+# Finished Make data base on Sun Jul 24 14:45:33 2022
 
  

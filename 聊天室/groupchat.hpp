@@ -97,6 +97,7 @@ void groupchat::creategroups() //群的创建(服务器)
 
 void groupchat::showaddc(vector<group> &mygroup)
 {
+    sendMsg(socket, SHOWMYADD);
     if (mygroup.size() == 0)
     {
         cout << "你未加入任何群聊" << endl;
@@ -122,6 +123,7 @@ void groupchat::showaddc(vector<group> &mygroup)
 
 void groupchat::showmycreatc(vector<group> &mycreate) //我创建的群聊(客户端)
 {
+    sendMsg(socket, SHOWMYCREATE);
     if (mycreate.size() == 0)
     {
         cout << "你未加入任何群聊" << endl;
@@ -146,6 +148,7 @@ void groupchat::showmycreatc(vector<group> &mycreate) //我创建的群聊(客�
 }
 void groupchat::sjowmyctlc(vector<group> &myleader) //展示我管理的群聊(客户端)
 {
+    sendMsg(socket, SHOWMYCTL);
     if (myleader.size() == 0)
     {
         cout << "你未加入任何群聊" << endl;
@@ -175,8 +178,7 @@ void groupchat::Flushc(vector<group> &mygroup, vector<group> &myleader, vector<g
     myleader.clear();
     mycreate.clear();
     string temp;
-   // sendMsg(socket, FLUSH);
-
+    // sendMsg(socket, FLUSH);
     //我加入的
     recvMsg(socket, temp);
     int len = stoi(temp);
@@ -187,7 +189,6 @@ void groupchat::Flushc(vector<group> &mygroup, vector<group> &myleader, vector<g
         p.jsonprase(temp);
         mygroup.push_back(p);
     }
-
     //我管理的群聊
     recvMsg(socket, temp);
     len = stoi(temp);
@@ -225,7 +226,6 @@ void groupchat::Flushs()
             sendMsg(socket, json);
         }
     }
-
     //我管理的群聊
     len = r.scard(my_leadergroup);
     sendMsg(socket, to_string(len));
@@ -282,7 +282,6 @@ void groupchat::addgroups() //加入群聊(服务器)
         sendMsg(socket, "-1"); // 账号不存在
         // return;
     }
-
 }
 void groupchat::addgroupc() //加入群聊(客户端)
 {
@@ -335,7 +334,6 @@ void groupchat::cltmygroups() //管理我的群
 }
 void groupchat::cltmygroupc(vector<group> &myleader) //管理我的群
 {
-    sendMsg(socket, CTLMYGROUP);
     system("clear");
     cout << people.getname() << "的聊天室" << endl;
     //打印自己的所管理的群
@@ -348,12 +346,20 @@ void groupchat::cltmygroupc(vector<group> &myleader) //管理我的群
     cout << "请选择你要管理的群:";
     int i;
     cin >> i;
+    if (i <= 0 || i > myleader.size())
+    {
+        string buf;
+        cout << "处理完毕，输入任意字符返回" << endl;
+        cin >> buf;
+        system("clear");
+    }
     i--;
+    sendMsg(socket, CTLMYGROUP);
     string json;
-    json=myleader[i].tojson();
-    sendMsg(socket,json); //解析成json串发送给服务器
-    //cout << myleader[i].tojson() << endl;
-    // system("clear");
+    json = myleader[i].tojson();
+    sendMsg(socket, json); //解析成json串发送给服务器
+    // cout << myleader[i].tojson() << endl;
+    //  system("clear");
 
     int sel;
     do
@@ -392,9 +398,7 @@ void groupchat::agreeaddc()
     {
         for (int i = 0; i < len; i++)
         {
-            cout << buf << " 3857" << endl;
             recvMsg(socket, buf);
-            cout << buf << " 385" << endl;
             cout << "收到" << buf << "的入群申请" << endl;
             cout << "请做出选择[YES/NO]:";
         flag:
@@ -440,7 +444,7 @@ void groupchat::agreeadds(group &g)
             buf = r.gethash("peopleinfo", arr[i]->str);
             temp.jsonparse(buf);
             sendMsg(socket, temp.getname()); //发送名字
-            recvMsg(socket, buf); //接收对面的选择
+            recvMsg(socket, buf);            //接收对面的选择
             if (buf == "NO")
             {
                 //将数据删除
@@ -449,7 +453,7 @@ void groupchat::agreeadds(group &g)
             else //同意
             {
                 //添加数据
-                r.saddvalue("my_" + temp.getUID(), temp.getUID());
+                r.saddvalue("join" + temp.getUID(), g.getuid());
                 r.saddvalue(g.getmember(), temp.getUID());
                 //将数据删除
                 r.sremvalue("ifadd" + g.getuid(), temp.getUID());

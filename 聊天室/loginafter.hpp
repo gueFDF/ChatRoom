@@ -655,7 +655,10 @@ void logafter::groups() //群聊
         {
             tt.cltmygroups();
         }
-
+        if(se==SHOWMYADD||se==SHOWMYCREATE||se==SHOWMYCTL)
+        {
+            tt.Flushs();
+        }
     } while (se != LOGOUT && ret != 0);
 }
 
