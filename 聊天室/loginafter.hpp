@@ -603,7 +603,7 @@ void logafter::groupc() //群聊
             p.creategroupc();
             break;
         case 2:
-            p.groupchatc(mygroup);
+             p.groupchatc(mygroup);
             break;
         case 3:
             p.addgroupc();
@@ -648,23 +648,23 @@ void logafter::groups() //群聊
         {
             tt.creategroups();
         }
-        if (se == FLUSH)
+        else if (se == FLUSH)
         {
             tt.Flushs();
         }
-        if (se == ADDGROUP)
+        else if (se == ADDGROUP)
         {
             tt.addgroups();
         }
-        if (se == CTLMYGROUP)
+        else if (se == CTLMYGROUP)
         {
             tt.cltmygroups();
         }
-        if (se == GROUPCHAT)
+        else if (se == GROUPCHAT)
         {
-            tt.groupchats();
+             tt.groupchats();
         }
-        if (se == FLUSH)
+        else if (se == FLUSH)
         {
             tt.Flushs();
         }
